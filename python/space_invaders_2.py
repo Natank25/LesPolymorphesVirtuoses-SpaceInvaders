@@ -10,7 +10,7 @@ pygame.init()
 screen = pygame.display.set_mode((800,600))
 pygame.display.set_caption("Space Invaders") 
 # chargement de l image de fond
-fond = pygame.image.load('background.png')
+fond = pygame.image.load('img/background.png')
 
 # creation du joueur
 player = space.Joueur()

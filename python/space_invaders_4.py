@@ -9,7 +9,7 @@ pygame.init()
 screen = pygame.display.set_mode((800,600))
 pygame.display.set_caption("Space Invaders") 
 # chargement de l'image de fond
-fond = pygame.image.load('background.png')
+fond = pygame.image.load('img/background.png')
 
 # creation du joueur
 player = space.Joueur()
@@ -36,7 +36,7 @@ while running : # boucle infinie pour laisser la fenêtre ouverte
             sys.exit() # pour fermer correctement
        
        # gestion du clavier
-        if event.type == pygame.KEYDOWN : # si une touche a été tapée KEYUP quand on relache la touche
+        if event.type == pygame.KEYDOWN : # si une touche a été tapée - KEYUP quand on relache la touche
             if event.key == pygame.K_LEFT : # si la touche est la fleche gauche
                 player.sens = "gauche" # on déplace le vaisseau de 1 pixel sur la gauche
             if event.key == pygame.K_RIGHT : # si la touche est la fleche droite
