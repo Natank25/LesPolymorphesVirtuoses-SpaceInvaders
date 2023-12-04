@@ -7,10 +7,10 @@ import space
 pygame.init()
 
 # création d'une fenêtre de 800 par 600
-screen = pygame.display.set_mode((800,600))
+screen = pygame.display.set_mode((800,600)) # TODO: add pygame.NOFRAME
 pygame.display.set_caption("Space Invaders")
 # chargement de l image de fond
-fond = pygame.image.load('background.png')
+fond = pygame.image.load('img/background.png')
 
 ### BOUCLE DE JEU  ###
 running = True # variable pour laisser la fenêtre ouverte
@@ -35,3 +35,7 @@ while running : # boucle infinie pour laisser la fenêtre ouverte
 
     ### Actualisation de la scene ###
     pygame.display.update() # pour mettre à jour l'écran
+
+
+
+
