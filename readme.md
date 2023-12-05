@@ -6,3 +6,4 @@ To implement:
 - levels
 - sound
 - local multiplayer (maybe online)
+- currency system (gems : skins, coins : upgrades)
