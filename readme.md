@@ -1,5 +1,4 @@
-https://prod.liveshare.vsengsaas.visualstudio.com/join?0368D418C4A0E96C4D91151F6E64FE91808A
-
+https://code-with-me.global.jetbrains.com/M8IslG5r7axuSJLbnUXmQw#p=PC&fp=F483420ACAB37ED5C1FC5007789E46FAD8CD6AE02244613065A76767A10C00FC&newUi=true
 To implement:
 - skins
 - users
