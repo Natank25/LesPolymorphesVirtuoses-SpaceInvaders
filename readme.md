@@ -7,4 +7,5 @@ To implement:
 - local multiplayer (maybe online)
 - currency system (gems : skins, coins : upgrades)
 - healthbar (bosses)
+- A LA FIN : executable
   
