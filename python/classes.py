@@ -5,14 +5,17 @@ from enum import Enum
 import pygame
 from pygame.sprite import AbstractGroup
 
+
 class GameProperties:
-    
-    win_size: pygame.Rect = pygame.Rect(0,0,1920,1080)
+    win_size: pygame.Rect = pygame.Rect(0, 0, 1920, 1080)
 
     difficulty = 1
 
+    deltatime = 0
+
 
 class GameConstants:
+    InvaderGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
 
     class GameEvents(Enum):
         # common
@@ -65,7 +68,7 @@ class GameConstants:
     class EnemyAttributes(Enum):
         # common
         CommonInvaders1DefaultHealth = 1
-        CommonInvaders1DefaultSpeedx = 0.3
+        CommonInvaders1DefaultSpeedx = 0.1
         CommonInvaders1DefaultSpeedy = 0.1
 
         CommonInvaders2DefaultHealth = 5
@@ -288,7 +291,7 @@ class Player(pygame.sprite.Sprite):
 
 class Boss(pygame.sprite.Sprite):
     def __init__(self, hauteur, speedx, speedy, health, ATKspeed, img_name,
-                 file_ext="png", *groups: AbstractGroup):
+                 file_ext="png", *groups):
         super().__init__(*groups)
         self.hauteur = hauteur
         self.speedx = speedx
@@ -566,9 +569,8 @@ class Boss20(Boss):
 
 class Invader(pygame.sprite.Sprite):
     def __init__(self, hauteur, speedx, speedy, health, img_name,
-                 shooter=False, ATKspeed=0, can_esquive=False, file_ext="png",
-                 *groups: AbstractGroup):
-        super().__init__(*groups)
+                 shooter=False, ATKspeed=0, can_esquive=False, file_ext="png"):
+        super().__init__(GameConstants.InvaderGroup)
         self.speedx = speedx
         self.speedy = speedy
         self.depart = random.randint(0, GameProperties.win_size[0])
@@ -581,14 +583,14 @@ class Invader(pygame.sprite.Sprite):
         self.lastEsquive = pygame.time.get_ticks()
         self.nextEsquive = pygame.time.get_ticks() + random.randint(500, 5000)
         self.canEsquive = can_esquive
+        self.rect = self.image.get_rect()
 
     def avancer(self):
-        self.hauteur += self.speedx
+        self.rect.x += self.speedx * GameProperties.deltatime
         if (self.depart < GameProperties.win_size.x or self.depart >
                 GameProperties.win_size.y + GameProperties.win_size.width):
-            self.speedy = -self.speedy
-
-        self.depart += self.speedy
+            self.rect.y = -self.speedy
+        self.rect.y += self.speedy * GameProperties.deltatime
 
     def tier(self):
         if self.shooter:
@@ -602,7 +604,6 @@ class Invader(pygame.sprite.Sprite):
             self.esquive()
             self.lastEsquive = pygame.time.get_ticks()
             self.nextEsquive = pygame.time.get_ticks() + random.randint(500, 5000)
-
         self.avancer()
 
 
@@ -749,7 +750,7 @@ class ShooterInvader3(Invader):
                                  GameProperties.difficulty / 10),
                          GameConstants.EnemyAttributes.ShooterInvader3DefaultSpeedy.value + (
                                  GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.ShooterInvader3DefaultHealth.value * (1 + GameProperties.difficulty),'SpeedInvader1', shooter=True, ATKspeed=GameConstants.EnemyAttributes.ShooterInvader3DefaultSpeedATK.value)
+                         GameConstants.EnemyAttributes.ShooterInvader3DefaultHealth.value * (1 + GameProperties.difficulty), 'SpeedInvader1', shooter=True, ATKspeed=GameConstants.EnemyAttributes.ShooterInvader3DefaultSpeedATK.value)
 
 
 # endregion
@@ -819,7 +820,7 @@ class EnemiesManager:
                 EnemiesManager.next_events += {"Boss2SpawnEvent": 0}
             case 11:
                 for i in range(2 + GameProperties.difficulty):
-                    EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (1500*i) + pygame.time.get_ticks()})
+                    EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (1500 * i) + pygame.time.get_ticks()})
                     EnemiesManager.next_events.update({"TankInvader1SpawnEvent": (3000 * i) + pygame.time.get_ticks()})
                     for j in range(3 + GameProperties.difficulty):
                         EnemiesManager.next_events.update({"CommonInvader2SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
@@ -830,92 +831,37 @@ class EnemiesManager:
                         EnemiesManager.next_events.update({"TankInvader1SpawnEvent": (3000 * i * j) + pygame.time.get_ticks()})
                     EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (2000 * i) + pygame.time.get_ticks()})
             case 13:
-                for i in range(4 + GameProperties.difficulty):
-                    for j in range(3 + GameProperties.difficulty):
-                        EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-                        EnemiesManager.next_events.update({"TankInvader1SpawnEvent": (3000 * i * j) + pygame.time.get_ticks()})
-                    EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (2000 * i) + pygame.time.get_ticks()})
+                pass
             case 14:
-                for i in range(5 + GameProperties.difficulty):
-                    for j in range(3 + GameProperties.difficulty):
-                        EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-                        EnemiesManager.next_events.update({"TankInvader1SpawnEvent": (3000 * i * j) + pygame.time.get_ticks()})
-                    EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (2000 * i) + pygame.time.get_ticks()})
+                pass
             case 15:
                 EnemiesManager.next_events += {"Boss3SpawnEvent": 0}
             case 16:
-                for i in range(3):
-                    for j in range(3):
-                        EnemiesManager.next_events.update({"SpeedInvaderSpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-                        EnemiesManager.next_events.update({"TankInvader2SpawnEvent": (3000 * i * j) + pygame.time.get_ticks()})
-                    EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (2000 * i) + pygame.time.get_ticks()})
+                pass
             case 17:
-                for i in range(3):
-                    for j in range(3):
-                        EnemiesManager.next_events.update({"SpeedInvader3SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-                        EnemiesManager.next_events.update({"TankInvader2SpawnEvent": (3000 * i * j) + pygame.time.get_ticks()})
-                    EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (2000 * i) + pygame.time.get_ticks()})
+                pass
             case 18:
-                for i in range(3):
-                    for j in range(3):
-                        EnemiesManager.next_events.update({"SpeedInvader3SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-                        EnemiesManager.next_events.update({"TankInvader2SpawnEvent": (3000 * i * j) + pygame.time.get_ticks()})
-                    EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (2000 * i) + pygame.time.get_ticks()})
+                pass
             case 19:
-                for i in range(5):
-                    for j in range(3):
-                        EnemiesManager.next_events.update({"SpeedInvader3SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-                        EnemiesManager.next_events.update({"TankInvader2SpawnEvent": (3000 * i * j) + pygame.time.get_ticks()})
-                    EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (2000 * i) + pygame.time.get_ticks()})
+                pass
             case 20:
                 EnemiesManager.next_events += {"Boss4SpawnEvent": 0}
             case 21:
-                for i in range(3):
-                    for j in range(3):
-                        EnemiesManager.next_events.update({"SpeedInvader3SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-                        EnemiesManager.next_events.update({"TankInvader2SpawnEvent": (3000 * i * j) + pygame.time.get_ticks()})
-                    EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (2000 * i) + pygame.time.get_ticks()})
+                pass
             case 22:
-                for i in range(3):
-                    for j in range(3):
-                        EnemiesManager.next_events.update({"SpeedInvader3SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-                        EnemiesManager.next_events.update({"TankInvader2SpawnEvent": (3000 * i * j) + pygame.time.get_ticks()})
-                    EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (2000 * i) + pygame.time.get_ticks()})
+                pass
             case 23:
-                for i in range(3):
-                    for j in range(3):
-                        EnemiesManager.next_events.update({"SpeedInvader3SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-                        EnemiesManager.next_events.update({"TankInvader2SpawnEvent": (3000 * i * j) + pygame.time.get_ticks()})
-                    EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (2000 * i) + pygame.time.get_ticks()})
+                pass
             case 24:
-                for i in range(3):
-                    for j in range(3):
-                        EnemiesManager.next_events.update({"SpeedInvader3SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-                        EnemiesManager.next_events.update({"TankInvader2SpawnEvent": (3000 * i * j) + pygame.time.get_ticks()})
-                    EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (2000 * i) + pygame.time.get_ticks()})
+                pass
             case 25:
                 EnemiesManager.next_events += {"Boss5SpawnEvent": 0}
             case 26:
-                for i in range(3):
-                    for j in range(3):
-                        EnemiesManager.next_events.update({"SpeedInvader3SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-                        EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-                        EnemiesManager.next_events.update({"TankInvader1SpawnEvent": (3000 * i * j) + pygame.time.get_ticks()})
-                    EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (2000 * i) + pygame.time.get_ticks()})
+                pass
             case 27:
-                for i in range(3):
-                    for j in range(3):
-                        EnemiesManager.next_events.update({"SpeedInvader3SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-                        EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-                        EnemiesManager.next_events.update({"TankInvader1SpawnEvent": (3000 * i * j) + pygame.time.get_ticks()})
-                    EnemiesManager.next_events += {"SpeedInvader2SpawnEvent": (2000 * i) + pygame.time.get_ticks()}
+                pass
             case 28:
-                for i in range(3):
-                    for j in range(3):
-                        EnemiesManager.next_events.update({"SpeedInvader3SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-                        EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-                        EnemiesManager.next_events.update({"TankInvader1SpawnEvent": (3000 * i * j) + pygame.time.get_ticks()})
-                    EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (2000 * i) + pygame.time.get_ticks()})
+                pass
             case 29:
                 pass
             case 30:
@@ -959,11 +905,7 @@ class EnemiesManager:
             case 50:
                 EnemiesManager.next_events.update({"Boss10SpawnEvent": 0})
             case 51:
-                for i in range(3):
-                    for j in range(3):
-                        EnemiesManager.next_events.update({"SpeedInvader3SpawnEvent": (1500 * i * j) + pygame.time.get_ticks()})
-
-                    EnemiesManager.next_events.update({"SpeedInvader2SpawnEvent": (2000 * i) + pygame.time.get_ticks()})
+                pass
             case 52:
                 pass
             case 53:

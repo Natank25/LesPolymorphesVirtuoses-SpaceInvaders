@@ -1,8 +1,6 @@
 import sys
 from math import gcd
 
-import pygame
-
 from classes import *
 
 wanted_ratio = [8, 5]
@@ -15,6 +13,7 @@ screen = pygame.display.set_mode((win_size[0], win_size[1]), pygame.RESIZABLE)
 
 running = True
 
+background: pygame.surface = pygame.image.load(os.path.join("..", "img", "background.png"))
 
 def update_game_win() -> list:
     win_size = [pygame.display.get_window_size()[0], pygame.display.get_window_size()[1]]
@@ -52,10 +51,9 @@ def update_game_win() -> list:
 
 fullscreen = False
 
-
 prev_window_size = pygame.display.get_window_size()
 
-screen.fill("orange", rect=update_game_win())
+screen.blit(background, update_game_win())
 
 pygame.display.set_caption("Space Invaders")
 
@@ -66,12 +64,18 @@ EnemiesManager.list_enemies.append(CommonInvader1())
 
 player = Player([random.randint(0, GameProperties.win_size[0]), GameProperties.win_size[1] - 100], "vaisseau")
 
-EnemiesManager.send_waves_levels(1)
+# EnemiesManager.send_waves_levels(1)
 
+clock = pygame.time.Clock()
 # screen.blit(bg, (0, 0))
 while running:
 
+    GameProperties.deltatime = clock.tick(144)
+
     EnemiesManager.update()
+    GameConstants.InvaderGroup.clear(screen, background) # MONTODO: move background and finish sprites but long after
+    GameConstants.InvaderGroup.draw(screen)
+    GameConstants.InvaderGroup.update()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
