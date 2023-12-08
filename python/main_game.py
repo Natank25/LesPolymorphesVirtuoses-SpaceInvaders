@@ -4,19 +4,20 @@ from math import gcd
 from classes import *
 
 wanted_ratio = [8, 5]
-win_size = [random.randint(150, 1440), random.randint(150, 1440)]
 win_size = [800, 800]
 
 pygame.init()
 
 screen = pygame.display.set_mode((win_size[0], win_size[1]), pygame.RESIZABLE)
 
-background = pygame.image.load(os.path.join("img", "background.png"))
+background = pygame.image.load(os.path.join("..", "img", "background.png")).convert()
 background_rect = background.get_rect()
 
+decoupe_x = max((background.get_width() - 800) // 2, 0)
+decoupe_y = max((background.get_height() - 800) // 2, 0)
 
 def update_game_win() -> list:
-    global background_rect
+    global background_rect, decoupe_x, decoupe_y
     win_size = [pygame.display.get_window_size()[0], pygame.display.get_window_size()[1]]
 
     ratio = [win_size[0], win_size[1]]
@@ -36,19 +37,17 @@ def update_game_win() -> list:
 
     elif ratio[0] * wanted_ratio[0] < ratio[1] * wanted_ratio[1]:
         game_win_size[0] = win_size[0]
-        game_win_size[1] = game_win_size[0] * wanted_ratio[0] / wanted_ratio[1]
+        game_win_size[1] = int(game_win_size[0] * wanted_ratio[0] / wanted_ratio[1])
 
         part_filled_1 = [0, (win_size[1] / 2) - (game_win_size[1] / 2), game_win_size[0], game_win_size[1]]
 
     elif ratio[0] * wanted_ratio[0] > ratio[1] * wanted_ratio[1]:
         game_win_size[1] = win_size[1]
-        game_win_size[0] = game_win_size[1] * wanted_ratio[1] / wanted_ratio[0]
+        game_win_size[0] = int(game_win_size[1] * wanted_ratio[1] / wanted_ratio[0])
 
         part_filled_1 = [(win_size[0] / 2) - (game_win_size[0] / 2), 0, game_win_size[0], game_win_size[1]]
 
     GameProperties.win_size = pygame.Rect(part_filled_1)
-
-    background_rect = background_rect.clamp(GameProperties.win_size)
     return part_filled_1
 
 
@@ -58,7 +57,7 @@ prev_window_size = pygame.display.get_window_size()
 
 update_game_win()
 
-screen.blit(background, GameProperties.win_size, GameProperties.win_size)
+screen.blit(background, GameProperties.win_size.topleft, GameProperties.win_size)
 
 pygame.display.set_caption("Space Invaders")
 
@@ -78,10 +77,10 @@ clock = pygame.time.Clock()
 # screen.blit(bg, (0, 0))
 while running:
 
-    GameProperties.deltatime = clock.tick(144)
+    GameProperties.deltatime = clock.tick(200)
 
     EnemiesManager.update()
-    GameConstants.InvaderGroup.clear(screen, background)  # MONTODO: move background and finish sprites but long after
+    GameConstants.InvaderGroup.clear(screen, background)
     GameConstants.InvaderGroup.draw(screen)
     GameConstants.InvaderGroup.update()
 
@@ -90,22 +89,22 @@ while running:
             running = False
             sys.exit()
 
-        if event.type == GameConstants.GameEvents.CommonInvader1SpawnEvent.value:
+        elif event.type == GameConstants.GameEvents.CommonInvader1SpawnEvent.value:
             EnemiesManager.spawnEnemy(GameConstants.EnemyType.COMMONINVADER1)
-        if event.type == GameConstants.GameEvents.CommonInvader2SpawnEvent.value:
+        elif event.type == GameConstants.GameEvents.CommonInvader2SpawnEvent.value:
             EnemiesManager.spawnEnemy(GameConstants.EnemyType.COMMONINVADER2)
-        if event.type == GameConstants.GameEvents.SpeedInvader1SpawnEvent.value:
+        elif event.type == GameConstants.GameEvents.SpeedInvader1SpawnEvent.value:
             EnemiesManager.spawnEnemy(GameConstants.EnemyType.SPEEDINVADER1)
-        if event.type == GameConstants.GameEvents.SpeedInvader2SpawnEvent.value:
+        elif event.type == GameConstants.GameEvents.SpeedInvader2SpawnEvent.value:
             EnemiesManager.spawnEnemy(GameConstants.EnemyType.SPEEDINVADER2)
-        if event.type == GameConstants.GameEvents.TankInvader1SpawnEvent.value:
+        elif event.type == GameConstants.GameEvents.TankInvader1SpawnEvent.value:
             EnemiesManager.spawnEnemy(GameConstants.EnemyType.TANKINVADER1.value)
 
         elif event.type == pygame.WINDOWSIZECHANGED:
             update_game_win()
             screen.blit(background, GameProperties.win_size, GameProperties.win_size)
 
-        if event.type == pygame.KEYDOWN:
+        elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_F11:
                 fullscreen = not fullscreen
                 if fullscreen:
@@ -118,8 +117,7 @@ while running:
             if event.key == pygame.K_SPACE:
                 player.tirer()
 
-        if event.type == pygame.MOUSEBUTTONUP:
-            print(boutton_test.check_click())
+
 
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_q or event.key == pygame.K_d:
@@ -133,8 +131,9 @@ while running:
 
     player.bouger()
 
+
     screen.blit(player.image, player.pos)
 
-    pygame.display.update()
+    pygame.display.flip()
 
 pygame.quit()

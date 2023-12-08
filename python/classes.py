@@ -16,6 +16,8 @@ class GameProperties:
 
 class GameConstants:
     InvaderGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
+    PlayerGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
+    BulletGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
 
     class GameEvents(Enum):
         # common
@@ -266,15 +268,16 @@ class GameConstants:
         BOSS20 = "Boss20"
 
 
-class Balle:
+class Balle(pygame.sprite.Sprite):
     def __init__(self):
-        self.image = os.path.join('..', "img", "balle.png")
+        super().__init__(GameConstants.BulletGroup)
+        self.image = pygame.image.load(os.path.join('..', "img", "balle.png"))
 
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos, img_name, file_ext="png", *groups: AbstractGroup):
-        super().__init__(*groups)
-        self.image = pygame.image.load(os.path.join("img", img_name +
+    def __init__(self, pos, img_name, file_ext="png"):
+        super().__init__(GameConstants.PlayerGroup)
+        self.image = pygame.image.load(os.path.join("..", "img", img_name +
                                                     "." + file_ext))
         self.pos = pos
         self.speed = GameConstants.PlayerSpeed.STOP
@@ -286,7 +289,7 @@ class Player(pygame.sprite.Sprite):
         self.speed = speed
 
     def tirer(self):
-        pygame.image.load(os.path.join("img", "balle.png"))
+        pygame.image.load(os.path.join("..", "img", "balle.png"))
 
 
 class Boss(pygame.sprite.Sprite):
@@ -575,7 +578,7 @@ class Invader(pygame.sprite.Sprite):
         self.speedy = speedy
         self.depart = random.randint(0, GameProperties.win_size[0])
         self.hauteur = hauteur
-        self.image = pygame.image.load(os.path.join("img", img_name +
+        self.image = pygame.image.load(os.path.join("..", "img", img_name +
                                                     "." + file_ext))
         self.health = health
         self.shooter = shooter
