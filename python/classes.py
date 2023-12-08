@@ -274,7 +274,7 @@ class Balle:
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, img_name, file_ext="png", *groups: AbstractGroup):
         super().__init__(*groups)
-        self.image = pygame.image.load(os.path.join('..', "img", img_name +
+        self.image = pygame.image.load(os.path.join("img", img_name +
                                                     "." + file_ext))
         self.pos = pos
         self.speed = GameConstants.PlayerSpeed.STOP
@@ -286,7 +286,7 @@ class Player(pygame.sprite.Sprite):
         self.speed = speed
 
     def tirer(self):
-        pygame.image.load(os.path.join('..', "img", "balle.png"))
+        pygame.image.load(os.path.join("img", "balle.png"))
 
 
 class Boss(pygame.sprite.Sprite):
@@ -575,7 +575,7 @@ class Invader(pygame.sprite.Sprite):
         self.speedy = speedy
         self.depart = random.randint(0, GameProperties.win_size[0])
         self.hauteur = hauteur
-        self.image = pygame.image.load(os.path.join('..', "img", img_name +
+        self.image = pygame.image.load(os.path.join("img", img_name +
                                                     "." + file_ext))
         self.health = health
         self.shooter = shooter
@@ -583,14 +583,19 @@ class Invader(pygame.sprite.Sprite):
         self.lastEsquive = pygame.time.get_ticks()
         self.nextEsquive = pygame.time.get_ticks() + random.randint(500, 5000)
         self.canEsquive = can_esquive
-        self.rect = self.image.get_rect()
+        start_pos = self.image.get_rect()
+        start_pos.x = GameProperties.win_size[0]
+        start_pos.y = GameProperties.win_size[1]
+        self.rect = start_pos
 
     def avancer(self):
-        self.rect.x += self.speedx * GameProperties.deltatime
-        if (self.depart < GameProperties.win_size.x or self.depart >
-                GameProperties.win_size.y + GameProperties.win_size.width):
-            self.rect.y = -self.speedy
+
         self.rect.y += self.speedy * GameProperties.deltatime
+        self.rect.x += self.speedx * GameProperties.deltatime
+
+        if (self.rect.x < GameProperties.win_size.x or self.rect.x+self.rect.width > GameProperties.win_size.x + GameProperties.win_size.width):
+            self.speedx = -self.speedx
+        
 
     def tier(self):
         if self.shooter:
@@ -612,10 +617,11 @@ class Invader(pygame.sprite.Sprite):
 class CommonInvader1(Invader):
     def __init__(self):
         super().__init__(0,
-                         GameConstants.EnemyAttributes.CommonInvaders1DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.CommonInvaders1DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.CommonInvaders1DefaultSpeedx.value * (
+                                 GameProperties.difficulty),
+                         GameConstants.EnemyAttributes.CommonInvaders1DefaultSpeedy.value * (
+                                 GameProperties.difficulty
+                         )/2,
                          GameConstants.EnemyAttributes.CommonInvaders1DefaultHealth.value * (
                                  1 + GameProperties.difficulty),
                          "CommonInvader1")
@@ -1110,3 +1116,41 @@ class EnemiesManager:
 
         elif type == GameConstants.EnemyType.BOSS20:
             EnemiesManager.list_enemies.append(Boss20())
+
+# region UI
+
+class Button:
+    def __init__(self, text, xpos, ypos, sizex, sizey, color, fontcolor, fontsize, display, enabled, font = 'Arial'):
+        self.text = text
+        self.xpos = xpos
+        self.ypos = ypos
+        self.sizex = sizex
+        self.sizey = sizey
+        self.color = color
+        self.fontcolor = fontcolor
+        self.fontsize = fontsize
+        self.display = display
+        self.font = font
+        self.enabled = enabled
+        self.draw()
+
+    def draw(self):
+        font = pygame.font.Font(None, self.fontsize)
+        button_text = font.render(self.text, True, self.fontcolor)
+        button_rect = pygame.rect.Rect((self.xpos, self.ypos), (self.xpos + self.sizex, self.ypos + self.sizey))
+        pygame.draw.rect(self.display, self.color, button_rect, 0, 5) # width/border radius
+        self.display.blit(button_text, (self.xpos + self.sizex/2, self.ypos + self.sizey/2))
+
+    def check_click(self):
+        mouse_pos = pygame.mouse.get_pos()
+        leftclick = pygame.mouse.get_pressed()[0]
+        button_rect = pygame.rect.Rect((self.xpos, self.ypos), (self.xpos + self.sizex, self.ypos + self.sizey))
+        
+        if leftclick and button_rect.collidepoint(mouse_pos) and self.enabled:
+            return True
+        else:
+            return False
+
+
+
+# endregion
