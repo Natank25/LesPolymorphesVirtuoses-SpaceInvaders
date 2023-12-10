@@ -43,7 +43,7 @@ while running : # boucle infinie pour laisser la fenêtre ouverte
     ### Actualisation de la scene ###
     # deplacement des objets
     player.deplacer()
-    tir.bouger()
+    tir.controls()
     # dessins des objets
     screen.blit(tir.image,[tir.depart,tir.hauteur]) # appel de la fonction qui dessine le vaisseau du joueur        
     screen.blit(player.image,[player.position,500]) # appel de la fonction qui dessine le vaisseau du joueur

@@ -1,10 +1,10 @@
+import math
 import os
 import random
+import sys
 from enum import Enum
 
 import pygame
-from pygame.sprite import AbstractGroup
-
 
 class GameProperties:
     win_size: pygame.Rect = pygame.Rect(0, 0, 1920, 1080)
@@ -13,8 +13,174 @@ class GameProperties:
 
     deltatime = 0
 
+    win_scale = 1
+
+
+class Invader(pygame.sprite.Sprite):
+    def __init__(self, hauteur, speedx, speedy, health, img_name, shooter=False, ATKspeed=0, can_esquive=False, file_ext="png"):
+        super().__init__(GameConstants.InvaderGroup, GameConstants.AllSprites) # Run program and fix error
+        self.speedx = speedx
+        self.speedy = speedy
+        self.depart = random.randint(0, GameProperties.win_size[0])
+        self.hauteur = hauteur
+        self.image_path = os.path.join("..", "img", img_name + "." + file_ext)
+        self.image = pygame.image.load(self.image_path)
+        self.health = health
+        self.shooter = shooter
+        self.ATKspeed = ATKspeed
+        self.lastEsquive = pygame.time.get_ticks()
+        self.nextEsquive = pygame.time.get_ticks() + random.randint(500, 5000)
+        self.canEsquive = can_esquive
+        start_pos = self.image.get_rect()
+        start_pos.x = GameProperties.win_size[0]
+        start_pos.y = GameProperties.win_size[1]
+        self.rect = start_pos
+        print("JE SUIS VIVANT")
+
+
+    def avancer(self):
+
+        self.rect.y += self.speedy * GameProperties.deltatime
+        self.rect.x += self.speedx * GameProperties.deltatime
+
+        if self.rect.x < GameProperties.win_size.x or self.rect.x + self.rect.width > GameProperties.win_size.x + GameProperties.win_size.width:
+            self.speedx = -self.speedx
+
+    def tier(self):
+        if self.shooter:
+            print("Pew pew !")
+
+    def esquive(self):
+        self.speedy = -self.speedy
+
+    def update(self, *args, **kwargs):
+        if self.canEsquive and pygame.time.get_ticks() >= self.nextEsquive:
+            self.esquive()
+            self.lastEsquive = pygame.time.get_ticks()
+            self.nextEsquive = pygame.time.get_ticks() + random.randint(500, 5000)
+        self.avancer()
+
+# region Enemies
+
+class CommonInvader1(Invader):
+    def __init__(self):
+        super().__init__(0, 1 * GameProperties.difficulty,
+                         1 * GameProperties.difficulty / 2,
+                         1 * (1 + GameProperties.difficulty), "CommonInvader1")
+
+
+class CommonInvader2(Invader):
+    def __init__(self):
+        super().__init__(0, GameConstants.EnemyAttributes.CommonInvaders2DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.CommonInvaders2DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.CommonInvaders2DefaultHealth.value * (1 + GameProperties.difficulty), "CommonInvader2")
+
+
+class CommonInvader3(Invader):
+    def __init__(self):
+        super().__init__(0, GameConstants.EnemyAttributes.CommonInvaders3DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.CommonInvaders3DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.CommonInvaders3DefaultHealth.value * (1 + GameProperties.difficulty), "CommonInvader2")
+
+
+class SpeedInvader1(Invader):
+    def __init__(self):
+        super().__init__(0, GameConstants.EnemyAttributes.SpeedInvader1DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.SpeedInvader1DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.SpeedInvader2DefaultHealth.value * (1 + GameProperties.difficulty), "SpeedInvader1")
+
+
+class SpeedInvader2(Invader):
+    def __init__(self):
+        super().__init__(0, GameConstants.EnemyAttributes.SpeedInvader2DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.SpeedInvader2DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.SpeedInvader2DefaultHealth.value * (1 + GameProperties.difficulty), "SpeedInvader2")
+
+
+class SpeedInvader3(Invader):
+    def __init__(self):
+        super().__init__(0, GameConstants.EnemyAttributes.SpeedInvader2DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.SpeedInvader2DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.SpeedInvader2DefaultHealth.value * (1 + GameProperties.difficulty), "SpeedInvader2")
+
+
+class TankInvader1(Invader):
+    def __init__(self):
+        super().__init__(0, GameConstants.EnemyAttributes.TankInvader1DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.TankInvader1DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.TankInvader1DefaultHealth.value * (1 + GameProperties.difficulty), "SpeedInvader1")
+
+
+class TankInvader2(Invader):
+    def __init__(self):
+        super().__init__(0, GameConstants.EnemyAttributes.TankInvader2DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.TankInvader2DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.TankInvader2DefaultHealth.value * (1 + GameProperties.difficulty), "SpeedInvader1")
+
+
+class TankInvader3(Invader):
+    def __init__(self):
+        super().__init__(0, GameConstants.EnemyAttributes.TankInvader3DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.TankInvader3DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.TankInvader3DefaultHealth.value * (1 + GameProperties.difficulty), "SpeedInvader1")
+
+
+class ShooterInvader1(Invader):
+    def __init__(self):
+        super().__init__(0, GameConstants.EnemyAttributes.ShooterInvader1DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.ShooterInvader1DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.ShooterInvader1DefaultHealth.value * (1 + GameProperties.difficulty), 'SpeedInvader1', shooter=True,
+                         ATKspeed=GameConstants.EnemyAttributes.ShooterInvader1DefaultSpeedATK.value)
+
+
+class ShooterInvader2(Invader):
+    def __init__(self):
+        super().__init__(0, GameConstants.EnemyAttributes.ShooterInvader2DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.ShooterInvader2DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.ShooterInvader2DefaultHealth.value * (1 + GameProperties.difficulty), 'SpeedInvader1', shooter=True,
+                         ATKspeed=GameConstants.EnemyAttributes.ShooterInvader2DefaultSpeedATK.value)
+
+
+class ShooterInvader3(Invader):
+    def __init__(self):
+        super().__init__(0, GameConstants.EnemyAttributes.ShooterInvader3DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.ShooterInvader3DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.ShooterInvader3DefaultHealth.value * (1 + GameProperties.difficulty), 'SpeedInvader1', shooter=True,
+                         ATKspeed=GameConstants.EnemyAttributes.ShooterInvader3DefaultSpeedATK.value)
+
+
+# endregion
+
+class AllSpritesGroup(pygame.sprite.RenderClear):
+    def __init__(self, *sprites):
+        super().__init__(*sprites)
+
+    def moveSprites(self, current_window: pygame.rect.Rect, prev_window: pygame.rect.Rect):
+        scale_x = current_window.width / prev_window.width
+        scale_y = current_window.height / prev_window.height
+
+        GameProperties.win_scale = current_window.width / GameConstants.default_win_size[0]
+
+        for sprite in self.sprites():
+
+            if hasattr(sprite, 'image_path'):
+                sprite.image = pygame.transform.scale(pygame.image.load(sprite.image_path), (int(scale_x * sprite.image.get_width()), int(scale_y * sprite.image.get_height())))
+            else:
+                sprite.image = pygame.transform.scale(sprite.image, (int(scale_x * sprite.image.get_width()), int(scale_y * sprite.image.get_height())))
+
+            new_x = int((sprite.rect.x - prev_window.x) * scale_x + current_window.x)
+            new_y = int((sprite.rect.y - prev_window.y) * scale_y + current_window.y)
+
+            sprite.rect = sprite.image.get_rect(topleft=(new_x, new_y))
+
+
+
 
 class GameConstants:
+
+    default_win_size = [500,800]
+
+    AllSprites: AllSpritesGroup = AllSpritesGroup()
     InvaderGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
     PlayerGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
     BulletGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
@@ -62,10 +228,8 @@ class GameConstants:
         Boss19SpawnEvent = pygame.USEREVENT + 28
         Boss20SpawnEvent = pygame.USEREVENT + 29
 
-    class PlayerSpeed(Enum):
-        LEFT = -2
-        STOP = 0
-        RIGHT = 2
+    class PlayerProperties(Enum):
+        SPEED = 0.3
 
     class EnemyAttributes(Enum):
         # common
@@ -225,11 +389,17 @@ class GameConstants:
         Boss20DefaultSpeedATK = 1
 
     class EnemyType(Enum):
-        # common
-        COMMONINVADER1 = "CommonInvader1"
-        COMMONINVADER2 = "CommonInvader2"
-        COMMONINVADER3 = "CommonInvader3"
 
+        def __init__(self, EnemyName, EnemyClass):
+            self.enemy_name = EnemyName
+            self.enemy_class = EnemyClass
+            self.spawn_event_name = self.enemy_name+"SpawnEvent"
+
+        # common
+        COMMONINVADER1 = "CommonInvader1", CommonInvader1()
+        COMMONINVADER2 = "CommonInvader2", CommonInvader2()
+        COMMONINVADER3 = "CommonInvader3", CommonInvader3()
+"""
         # speed
         SPEEDINVADER1 = "SpeedInvader1"
         SPEEDINVADER2 = "SpeedInvader2"
@@ -266,503 +436,226 @@ class GameConstants:
         BOSS18 = "Boss18"
         BOSS19 = "Boss19"
         BOSS20 = "Boss20"
-
+"""
 
 class Balle(pygame.sprite.Sprite):
     def __init__(self):
-        super().__init__(GameConstants.BulletGroup)
-        self.image = pygame.image.load(os.path.join('..', "img", "balle.png"))
+        super().__init__(GameConstants.BulletGroup, GameConstants.AllSprites)
+
+        self.image_path = os.path.join('..', "img", "balle.png")
+        self.image = pygame.image.load(self.image_path)
 
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos, img_name, file_ext="png"):
-        super().__init__(GameConstants.PlayerGroup)
-        self.image = pygame.image.load(os.path.join("..", "img", img_name +
-                                                    "." + file_ext))
-        self.pos = pos
-        self.speed = GameConstants.PlayerSpeed.STOP
+        super().__init__(GameConstants.PlayerGroup, GameConstants.AllSprites)
+        self.image_path = os.path.join("..", "img", img_name + "." + file_ext)
+        self.image = pygame.image.load(self.image_path)
+        self.rect = self.image.get_rect()
+        self.rect.move_ip(pos[0], pos[1])
 
-    def bouger(self):
-        self.pos[0] += self.speed.value
+    def controls(self, keys):
+        if keys[pygame.K_z]:
+            self.rect.y -= GameConstants.PlayerProperties.SPEED.value * GameProperties.win_scale * GameProperties.deltatime
+        elif keys[pygame.K_s]:
+            self.rect.y += GameConstants.PlayerProperties.SPEED.value * GameProperties.win_scale * GameProperties.deltatime
+        elif keys[pygame.K_q]:
+            self.rect.x -= GameConstants.PlayerProperties.SPEED.value * GameProperties.win_scale * GameProperties.deltatime
+        elif keys[pygame.K_d]:
+            self.rect.x += GameConstants.PlayerProperties.SPEED.value * GameProperties.win_scale * GameProperties.deltatime
 
-    def setSpeed(self, speed: GameConstants.PlayerSpeed):
-        self.speed = speed
 
     def tirer(self):
+        pass
         pygame.image.load(os.path.join("..", "img", "balle.png"))
+
+    def update(self):
+        keys = pygame.key.get_pressed()
+        self.controls(keys)
+
+        if keys[pygame.K_SPACE]:
+            self.tirer()
+
 
 
 class Boss(pygame.sprite.Sprite):
-    def __init__(self, hauteur, speedx, speedy, health, ATKspeed, img_name,
-                 file_ext="png", *groups):
-        super().__init__(*groups)
+    def __init__(self, hauteur, speedx, speedy, health, ATKspeed, img_name, file_ext="png", *groups):
+        super().__init__(*groups, GameConstants.AllSprites)
         self.hauteur = hauteur
         self.speedx = speedx
         self.speedy = speedy
         self.health = health
         self.ATKspeed = ATKspeed
-        self.img_name = pygame.image.load(os.path.join('..', "img", img_name +
-                                                       "." + file_ext))
+        self.image_path = os.path.join("..", "img", img_name + "." + file_ext)
+        self.image = pygame.image.load(self.image_path)
 
 
 # region Bosses
 
 class Boss1(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss1DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss1DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss1DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss1DefaultSpeedATK.value + GameProperties.difficulty,
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss1DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss1DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss1DefaultHealth.value * (1 + GameProperties.difficulty), GameConstants.EnemyAttributes.Boss1DefaultSpeedATK.value + GameProperties.difficulty,
                          img_name="CommonInvader1")
 
 
 class Boss2(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss2DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss2DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss2DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss2DefaultSpeedATK.value + GameProperties.difficulty,
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss2DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss2DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss2DefaultHealth.value * (1 + GameProperties.difficulty), GameConstants.EnemyAttributes.Boss2DefaultSpeedATK.value + GameProperties.difficulty,
                          img_name="CommonInvader1")
 
 
 class Boss3(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss3DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss3DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss3DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss3DefaultSpeedATK.value + GameProperties.difficulty,
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss3DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss3DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss3DefaultHealth.value * (1 + GameProperties.difficulty), GameConstants.EnemyAttributes.Boss3DefaultSpeedATK.value + GameProperties.difficulty,
                          img_name="CommonInvader1")
 
 
 class Boss4(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss4DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss4DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss4DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss4DefaultSpeedATK.value + GameProperties.difficulty,
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss4DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss4DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss4DefaultHealth.value * (1 + GameProperties.difficulty), GameConstants.EnemyAttributes.Boss4DefaultSpeedATK.value + GameProperties.difficulty,
                          img_name="CommonInvader1")
 
 
 class Boss5(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss5DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss5DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss5DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss5DefaultSpeedATK.value + GameProperties.difficulty,
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss5DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss5DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss5DefaultHealth.value * (1 + GameProperties.difficulty), GameConstants.EnemyAttributes.Boss5DefaultSpeedATK.value + GameProperties.difficulty,
                          img_name="CommonInvader1")
 
 
 class Boss6(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss6DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss6DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss6DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss6DefaultSpeedATK.value + GameProperties.difficulty,
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss6DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss6DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss6DefaultHealth.value * (1 + GameProperties.difficulty), GameConstants.EnemyAttributes.Boss6DefaultSpeedATK.value + GameProperties.difficulty,
                          img_name="CommonInvader1")
 
 
 class Boss7(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss7DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss7DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss7DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss7DefaultSpeedATK.value + GameProperties.difficulty,
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss7DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss7DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss7DefaultHealth.value * (1 + GameProperties.difficulty), GameConstants.EnemyAttributes.Boss7DefaultSpeedATK.value + GameProperties.difficulty,
                          img_name="CommonInvader1")
 
 
 class Boss8(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss8DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss8DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss8DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss8DefaultSpeedATK.value + GameProperties.difficulty,
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss8DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss8DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss8DefaultHealth.value * (1 + GameProperties.difficulty), GameConstants.EnemyAttributes.Boss8DefaultSpeedATK.value + GameProperties.difficulty,
                          img_name="CommonInvader1")
 
 
 class Boss9(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss9DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss9DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss9DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss9DefaultSpeedATK.value + GameProperties.difficulty,
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss9DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss9DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss9DefaultHealth.value * (1 + GameProperties.difficulty), GameConstants.EnemyAttributes.Boss9DefaultSpeedATK.value + GameProperties.difficulty,
                          img_name="CommonInvader1")
 
 
 class Boss10(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss10DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss10DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss10DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss10DefaultSpeedATK.value + GameProperties.difficulty,
-                         img_name="CommonInvader1")
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss10DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss10DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss10DefaultHealth.value * (1 + GameProperties.difficulty),
+                         GameConstants.EnemyAttributes.Boss10DefaultSpeedATK.value + GameProperties.difficulty, img_name="CommonInvader1")
 
 
 class Boss11(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss11DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss11DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss11DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss11DefaultSpeedATK.value + GameProperties.difficulty,
-                         img_name="CommonInvader1")
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss11DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss11DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss11DefaultHealth.value * (1 + GameProperties.difficulty),
+                         GameConstants.EnemyAttributes.Boss11DefaultSpeedATK.value + GameProperties.difficulty, img_name="CommonInvader1")
 
 
 class Boss12(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss12DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss12DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss12DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss12DefaultSpeedATK.value + GameProperties.difficulty,
-                         img_name="CommonInvader1")
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss12DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss12DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss12DefaultHealth.value * (1 + GameProperties.difficulty),
+                         GameConstants.EnemyAttributes.Boss12DefaultSpeedATK.value + GameProperties.difficulty, img_name="CommonInvader1")
 
 
 class Boss13(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss13DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss13DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss13DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss13DefaultSpeedATK.value + GameProperties.difficulty,
-                         img_name="CommonInvader1")
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss13DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss13DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss13DefaultHealth.value * (1 + GameProperties.difficulty),
+                         GameConstants.EnemyAttributes.Boss13DefaultSpeedATK.value + GameProperties.difficulty, img_name="CommonInvader1")
 
 
 class Boss14(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss14DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss14DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss14DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss14DefaultSpeedATK.value + GameProperties.difficulty,
-                         img_name="CommonInvader1")
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss14DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss14DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss14DefaultHealth.value * (1 + GameProperties.difficulty),
+                         GameConstants.EnemyAttributes.Boss14DefaultSpeedATK.value + GameProperties.difficulty, img_name="CommonInvader1")
 
 
 class Boss15(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss15DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss15DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss15DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss15DefaultSpeedATK.value + GameProperties.difficulty,
-                         img_name="CommonInvader1")
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss15DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss15DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss15DefaultHealth.value * (1 + GameProperties.difficulty),
+                         GameConstants.EnemyAttributes.Boss15DefaultSpeedATK.value + GameProperties.difficulty, img_name="CommonInvader1")
 
 
 class Boss16(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss16DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss16DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss16DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss16DefaultSpeedATK.value + GameProperties.difficulty,
-                         img_name="CommonInvader1")
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss16DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss16DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss16DefaultHealth.value * (1 + GameProperties.difficulty),
+                         GameConstants.EnemyAttributes.Boss16DefaultSpeedATK.value + GameProperties.difficulty, img_name="CommonInvader1")
 
 
 class Boss17(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss17DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss17DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss17DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss17DefaultSpeedATK.value + GameProperties.difficulty,
-                         img_name="CommonInvader1")
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss17DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss17DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss17DefaultHealth.value * (1 + GameProperties.difficulty),
+                         GameConstants.EnemyAttributes.Boss17DefaultSpeedATK.value + GameProperties.difficulty, img_name="CommonInvader1")
 
 
 class Boss18(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss18DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss18DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss18DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss18DefaultSpeedATK.value + GameProperties.difficulty,
-                         img_name="CommonInvader1")
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss18DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss18DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss18DefaultHealth.value * (1 + GameProperties.difficulty),
+                         GameConstants.EnemyAttributes.Boss18DefaultSpeedATK.value + GameProperties.difficulty, img_name="CommonInvader1")
 
 
 class Boss19(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss19DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss19DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss19DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss19DefaultSpeedATK.value + GameProperties.difficulty,
-                         img_name="CommonInvader1")
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss19DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss19DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss19DefaultHealth.value * (1 + GameProperties.difficulty),
+                         GameConstants.EnemyAttributes.Boss19DefaultSpeedATK.value + GameProperties.difficulty, img_name="CommonInvader1")
 
 
 class Boss20(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         GameConstants.EnemyAttributes.Boss20DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.Boss20DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.Boss20DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.Boss20DefaultSpeedATK.value + GameProperties.difficulty,
-                         img_name="CommonInvader1")
+        super().__init__(hauteur, GameConstants.EnemyAttributes.Boss20DefaultSpeedx.value + (GameProperties.difficulty / 10),
+                         GameConstants.EnemyAttributes.Boss20DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         GameConstants.EnemyAttributes.Boss20DefaultHealth.value * (1 + GameProperties.difficulty),
+                         GameConstants.EnemyAttributes.Boss20DefaultSpeedATK.value + GameProperties.difficulty, img_name="CommonInvader1")
 
 
 # endregion
 
 
-class Invader(pygame.sprite.Sprite):
-    def __init__(self, hauteur, speedx, speedy, health, img_name,
-                 shooter=False, ATKspeed=0, can_esquive=False, file_ext="png"):
-        super().__init__(GameConstants.InvaderGroup)
-        self.speedx = speedx
-        self.speedy = speedy
-        self.depart = random.randint(0, GameProperties.win_size[0])
-        self.hauteur = hauteur
-        self.image = pygame.image.load(os.path.join("..", "img", img_name +
-                                                    "." + file_ext))
-        self.health = health
-        self.shooter = shooter
-        self.ATKspeed = ATKspeed
-        self.lastEsquive = pygame.time.get_ticks()
-        self.nextEsquive = pygame.time.get_ticks() + random.randint(500, 5000)
-        self.canEsquive = can_esquive
-        start_pos = self.image.get_rect()
-        start_pos.x = GameProperties.win_size[0]
-        start_pos.y = GameProperties.win_size[1]
-        self.rect = start_pos
 
-    def avancer(self):
-
-        self.rect.y += self.speedy * GameProperties.deltatime
-        self.rect.x += self.speedx * GameProperties.deltatime
-
-        if (self.rect.x < GameProperties.win_size.x or self.rect.x+self.rect.width > GameProperties.win_size.x + GameProperties.win_size.width):
-            self.speedx = -self.speedx
-        
-
-    def tier(self):
-        if self.shooter:
-            print("Pew pew !")
-
-    def esquive(self):
-        self.speedy = -self.speedy
-
-    def update(self, *args, **kwargs):
-        if self.canEsquive and pygame.time.get_ticks() >= self.nextEsquive:
-            self.esquive()
-            self.lastEsquive = pygame.time.get_ticks()
-            self.nextEsquive = pygame.time.get_ticks() + random.randint(500, 5000)
-        self.avancer()
-
-
-# region Enemies
-
-class CommonInvader1(Invader):
-    def __init__(self):
-        super().__init__(0,
-                         GameConstants.EnemyAttributes.CommonInvaders1DefaultSpeedx.value * (
-                                 GameProperties.difficulty),
-                         GameConstants.EnemyAttributes.CommonInvaders1DefaultSpeedy.value * (
-                                 GameProperties.difficulty
-                         )/2,
-                         GameConstants.EnemyAttributes.CommonInvaders1DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         "CommonInvader1")
-
-
-class CommonInvader2(Invader):
-    def __init__(self):
-        super().__init__(0,
-                         GameConstants.EnemyAttributes.CommonInvaders2DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.CommonInvaders2DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.CommonInvaders2DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         "CommonInvader2")
-
-
-class CommonInvader3(Invader):
-    def __init__(self):
-        super().__init__(0,
-                         GameConstants.EnemyAttributes.CommonInvaders3DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.CommonInvaders3DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.CommonInvaders3DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         "CommonInvader2")
-
-
-class SpeedInvader1(Invader):
-    def __init__(self):
-        super().__init__(0,
-                         GameConstants.EnemyAttributes.SpeedInvader1DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.SpeedInvader1DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.SpeedInvader2DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         "SpeedInvader1")
-
-
-class SpeedInvader2(Invader):
-    def __init__(self):
-        super().__init__(0,
-                         GameConstants.EnemyAttributes.SpeedInvader2DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.SpeedInvader2DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.SpeedInvader2DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         "SpeedInvader2")
-
-
-class SpeedInvader3(Invader):
-    def __init__(self):
-        super().__init__(0,
-                         GameConstants.EnemyAttributes.SpeedInvader2DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.SpeedInvader2DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.SpeedInvader2DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         "SpeedInvader2")
-
-
-class TankInvader1(Invader):
-    def __init__(self):
-        super().__init__(0,
-                         GameConstants.EnemyAttributes.TankInvader1DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.TankInvader1DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.TankInvader1DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         "SpeedInvader1")
-
-
-class TankInvader2(Invader):
-    def __init__(self):
-        super().__init__(0,
-                         GameConstants.EnemyAttributes.TankInvader2DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.TankInvader2DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.TankInvader2DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         "SpeedInvader1")
-
-
-class TankInvader3(Invader):
-    def __init__(self):
-        super().__init__(0,
-                         GameConstants.EnemyAttributes.TankInvader3DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.TankInvader3DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.TankInvader3DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         "SpeedInvader1")
-
-
-class ShooterInvader1(Invader):
-    def __init__(self):
-        super().__init__(0,
-                         GameConstants.EnemyAttributes.ShooterInvader1DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.ShooterInvader1DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.ShooterInvader1DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         'SpeedInvader1', shooter=True,
-                         ATKspeed=GameConstants.EnemyAttributes.ShooterInvader1DefaultSpeedATK.value)
-
-
-class ShooterInvader2(Invader):
-    def __init__(self):
-        super().__init__(0,
-                         GameConstants.EnemyAttributes.ShooterInvader2DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.ShooterInvader2DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.ShooterInvader2DefaultHealth.value * (
-                                 1 + GameProperties.difficulty),
-                         'SpeedInvader1', shooter=True,
-                         ATKspeed=GameConstants.EnemyAttributes.ShooterInvader2DefaultSpeedATK.value)
-
-
-class ShooterInvader3(Invader):
-    def __init__(self):
-        super().__init__(0,
-                         GameConstants.EnemyAttributes.ShooterInvader3DefaultSpeedx.value + (
-                                 GameProperties.difficulty / 10),
-                         GameConstants.EnemyAttributes.ShooterInvader3DefaultSpeedy.value + (
-                                 GameProperties.difficulty / 20),
-                         GameConstants.EnemyAttributes.ShooterInvader3DefaultHealth.value * (1 + GameProperties.difficulty), 'SpeedInvader1', shooter=True, ATKspeed=GameConstants.EnemyAttributes.ShooterInvader3DefaultSpeedATK.value)
-
-
-# endregion
 
 class EnemiesManager:
     list_enemies = []
@@ -773,8 +666,9 @@ class EnemiesManager:
     def update():
         current_time = pygame.time.get_ticks()
         for event in EnemiesManager.next_events:
-            if event == "CommonInvader1SpawnEvent" and EnemiesManager.next_events[event] == current_time:
-                EnemiesManager.spawnEnemy(GameConstants.EnemyType.COMMONINVADER1)
+            if EnemiesManager.next_events[event] != current_time:
+                continue
+            EnemiesManager.spawnEnemy(event.enemy_type)
 
     @staticmethod
     def send_waves_endless(difficulty: int):
@@ -786,7 +680,7 @@ class EnemiesManager:
         match num_lvl:
             case 1:
                 for i in range(3 + GameProperties.difficulty):
-                    EnemiesManager.next_events.update({"CommonInvader1SpawnEvent": (1500 * i) + pygame.time.get_ticks()})
+                    EnemiesManager.next_events.update({GameConstants.EnemyType.COMMONINVADER1: (1500 * i) + pygame.time.get_ticks()})
 
             case 2:
                 for i in range(2 + GameProperties.difficulty):
@@ -1015,115 +909,18 @@ class EnemiesManager:
                 EnemiesManager.next_events.update({"Boss20SpawnEvent": 0})
 
     @staticmethod
-    def spawnEnemy(type: GameConstants.EnemyType):
+    def spawnEnemy(enemy_type: GameConstants.EnemyType):
 
-        # common
-        if type == GameConstants.EnemyType.COMMONINVADER1:
-            EnemiesManager.list_enemies.append(CommonInvader1())
+        EnemiesManager.list_enemies.append(enemy_type.enemy_class)
 
-        elif type == GameConstants.EnemyType.COMMONINVADER2:
-            EnemiesManager.list_enemies.append(CommonInvader2())
 
-        elif type == GameConstants.EnemyType.COMMONINVADER3:
-            EnemiesManager.list_enemies.append(CommonInvader3())
 
-        # speed
-        elif type == GameConstants.EnemyType.SPEEDINVADER1:
-            EnemiesManager.list_enemies.append(CommonInvader1())
 
-        elif type == GameConstants.EnemyType.SPEEDINVADER2:
-            EnemiesManager.list_enemies.append(SpeedInvader2())
-
-        elif type == GameConstants.EnemyType.SPEEDINVADER3:
-            EnemiesManager.list_enemies.append(SpeedInvader3())
-
-        # tank
-        elif type == GameConstants.EnemyType.TANKINVADER1:
-            EnemiesManager.list_enemies.append(TankInvader1())
-
-        elif type == GameConstants.EnemyType.TANKINVADER2:
-            EnemiesManager.list_enemies.append(TankInvader2())
-
-        elif type == GameConstants.EnemyType.TANKINVADER3:
-            EnemiesManager.list_enemies.append(TankInvader3())
-
-        # shooter
-
-        elif type == GameConstants.EnemyType.SHOOTERINVADER1:
-            EnemiesManager.list_enemies.append(ShooterInvader1())
-
-        elif type == GameConstants.EnemyType.SHOOTERINVADER2:
-            EnemiesManager.list_enemies.append(ShooterInvader2())
-
-        elif type == GameConstants.EnemyType.SHOOTERINVADER3:
-            EnemiesManager.list_enemies.append(ShooterInvader3())
-
-        # Boss
-
-        elif type == GameConstants.EnemyType.BOSS1:
-            EnemiesManager.list_enemies.append(Boss1())
-
-        elif type == GameConstants.EnemyType.BOSS2:
-            EnemiesManager.list_enemies.append(Boss2())
-
-        elif type == GameConstants.EnemyType.BOSS3:
-            EnemiesManager.list_enemies.append(Boss3())
-
-        elif type == GameConstants.EnemyType.BOSS4:
-            EnemiesManager.list_enemies.append(Boss4())
-
-        elif type == GameConstants.EnemyType.BOSS5:
-            EnemiesManager.list_enemies.append(Boss5())
-
-        elif type == GameConstants.EnemyType.BOSS6:
-            EnemiesManager.list_enemies.append(Boss6())
-
-        elif type == GameConstants.EnemyType.BOSS7:
-            EnemiesManager.list_enemies.append(Boss7())
-
-        elif type == GameConstants.EnemyType.BOSS8:
-            EnemiesManager.list_enemies.append(Boss8())
-
-        elif type == GameConstants.EnemyType.BOSS9:
-            EnemiesManager.list_enemies.append(Boss9())
-
-        elif type == GameConstants.EnemyType.BOSS10:
-            EnemiesManager.list_enemies.append(Boss10())
-
-        elif type == GameConstants.EnemyType.BOSS11:
-            EnemiesManager.list_enemies.append(Boss11())
-
-        elif type == GameConstants.EnemyType.BOSS12:
-            EnemiesManager.list_enemies.append(Boss12())
-
-        elif type == GameConstants.EnemyType.BOSS13:
-            EnemiesManager.list_enemies.append(Boss13())
-
-        elif type == GameConstants.EnemyType.BOSS14:
-            EnemiesManager.list_enemies.append(Boss14())
-
-        elif type == GameConstants.EnemyType.BOSS15:
-            EnemiesManager.list_enemies.append(Boss15())
-
-        elif type == GameConstants.EnemyType.BOSS16:
-            EnemiesManager.list_enemies.append(Boss16())
-
-        elif type == GameConstants.EnemyType.BOSS17:
-            EnemiesManager.list_enemies.append(Boss17())
-
-        elif type == GameConstants.EnemyType.BOSS18:
-            EnemiesManager.list_enemies.append(Boss18())
-
-        elif type == GameConstants.EnemyType.BOSS19:
-            EnemiesManager.list_enemies.append(Boss19())
-
-        elif type == GameConstants.EnemyType.BOSS20:
-            EnemiesManager.list_enemies.append(Boss20())
 
 # region UI
 
 class Button:
-    def __init__(self, text, xpos, ypos, sizex, sizey, color, fontcolor, fontsize, display, enabled, font = 'Arial'):
+    def __init__(self, text, xpos, ypos, sizex, sizey, color, fontcolor, fontsize, display, enabled, font='Arial'):
         self.text = text
         self.xpos = xpos
         self.ypos = ypos
@@ -1141,19 +938,37 @@ class Button:
         font = pygame.font.Font(None, self.fontsize)
         button_text = font.render(self.text, True, self.fontcolor)
         button_rect = pygame.rect.Rect((self.xpos, self.ypos), (self.xpos + self.sizex, self.ypos + self.sizey))
-        pygame.draw.rect(self.display, self.color, button_rect, 0, 5) # width/border radius
-        self.display.blit(button_text, (self.xpos + self.sizex/2, self.ypos + self.sizey/2))
+        pygame.draw.rect(self.display, self.color, button_rect, 0, 5)  # width/border radius
+        self.display.blit(button_text, (self.xpos + self.sizex / 2, self.ypos + self.sizey / 2))
 
-    def check_click(self):
+    def check_click_quit(self):
         mouse_pos = pygame.mouse.get_pos()
         leftclick = pygame.mouse.get_pressed()[0]
         button_rect = pygame.rect.Rect((self.xpos, self.ypos), (self.xpos + self.sizex, self.ypos + self.sizey))
-        
+
         if leftclick and button_rect.collidepoint(mouse_pos) and self.enabled:
-            return True
+            pygame.quit()
+            quit()
         else:
-            return False
+            pass
 
+    def check_click_level(self):
+        mouse_pos = pygame.mouse.get_pos()
+        leftclick = pygame.mouse.get_pressed()[0]
+        button_rect = pygame.rect.Rect((self.xpos, self.ypos), (self.xpos + self.sizex, self.ypos + self.sizey))
+        if leftclick and button_rect.collidepoint(mouse_pos) and self.enabled:
+            print("mode normal commence")
+        else:
+            pass
 
+def title(screen):
+    surfacex= GameProperties.win_size.x + 50
+    surfacey = GameProperties.win_size.y + 50
+    start_angle = 0.8
+    drawn_surface = GameProperties.win_size.copy()
+    drawn_surface.width *= 1
+    drawn_surface.height *= 0.5
+    drawn_surface.move_ip(0,100)
+    pygame.draw.arc(screen, "white",drawn_surface, start_angle, math.pi - start_angle)
 
 # endregion
