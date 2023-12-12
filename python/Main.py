@@ -1,11 +1,17 @@
+import os
 from math import gcd
 
 import pygame.transform
 
-from classes import *
+from python.GameProperties import GameProperties
+from python.UI_Manager import UI_Manager
+from python.Groups import Groups
+import sys
 
 wanted_ratio = [8, 5]
-win_size = GameConstants.default_win_size.copy()
+win_size = GameProperties.default_win_size.copy()
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 pygame.init()
 
@@ -60,7 +66,7 @@ pygame.display.set_caption("Space Invaders")
 
 running = True
 
-UI.show_menu()
+UI_Manager.show_menu()
 
 
 clock = pygame.time.Clock()
@@ -69,10 +75,10 @@ while running:
 
     GameProperties.deltatime = clock.tick(60)
 
-    GameProperties.AllSprites.clear(GameProperties.screen, GameProperties.group_background)
-    GameProperties.AllSprites.draw(GameProperties.screen)
-    GameProperties.AllSprites.update()
-    GameProperties.UIGroup.draw(GameProperties.screen)
+    Groups.AllSprites.clear(GameProperties.screen, GameProperties.group_background)
+    Groups.AllSprites.draw(GameProperties.screen)
+    Groups.AllSprites.update()
+    Groups.UIGroup.draw(GameProperties.screen)
 
     # GameProperties.screen.fill("black", GameProperties.screen_mask.)
 
@@ -89,8 +95,8 @@ while running:
             pygame.image.save(GameProperties.screen.copy(), "bg.png")
             GameProperties.group_background = pygame.image.load("bg.png")
 
-            GameProperties.AllSprites.moveSprites(GameProperties.win_size, prev_game_window)
-            GameProperties.UIGroup.moveSprites(GameProperties.win_size, prev_game_window)
+            Groups.AllSprites.moveSprites(GameProperties.win_size, prev_game_window)
+            Groups.UIGroup.moveSprites(GameProperties.win_size, prev_game_window)
 
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_F11:
@@ -105,9 +111,9 @@ while running:
 
                 GameProperties.screen.fill("black")
             if event.key == pygame.K_ESCAPE:
-                UI.show_menu()
+                UI_Manager.show_menu()
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            GameProperties.ButtonGroup.update()
+            Groups.ButtonGroup.update()
 
     pygame.display.flip()
 
