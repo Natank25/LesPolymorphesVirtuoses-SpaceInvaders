@@ -1,4 +1,3 @@
-import sys
 from math import gcd
 
 import pygame.transform
@@ -8,14 +7,11 @@ from classes import *
 wanted_ratio = [8, 5]
 win_size = GameConstants.default_win_size.copy()
 
-
 pygame.init()
 
-screen = pygame.display.set_mode((win_size[0], win_size[1]), pygame.RESIZABLE)
+GameProperties.screen = pygame.display.set_mode((win_size[0], win_size[1]), pygame.RESIZABLE)
 
-background = pygame.image.load(os.path.join("..", "img", "background.png")).convert()
-
-background_rect = background.get_rect()
+background_rect = GameProperties.background.get_rect()
 
 
 def update_game_win() -> list:
@@ -59,60 +55,42 @@ prev_window_size = pygame.display.get_window_size()
 
 update_game_win()
 
-screen.blit(background, GameProperties.win_size.topleft)
+GameProperties.screen.blit(GameProperties.background, GameProperties.win_size.topleft)
 pygame.display.set_caption("Space Invaders")
-
-pygame.image.save(screen.copy(), "bg.png")
-group_background = pygame.image.load("bg.png")
 
 running = True
 
-# EnemiesManager.list_enemies.append(CommonInvader1())
-# EnemiesManager.list_enemies.append(SpeedInvader1())
+UI.show_menu()
 
-player = Player([random.randint(GameProperties.win_size.x, GameProperties.win_size.width), GameProperties.win_size.height - 100], "vaisseau")
-
-# EnemiesManager.send_waves_levels(1)
-
-EnemiesManager.spawnEnemy(GameConstants.EnemyType.COMMONINVADER1)
-
-"""
-leave_game_button = Button("Quitter", GameProperties.win_size.x+200, GameProperties.win_size.y+200, 2, 1, "white", 'black',
-                      50, screen, True)
-
-play_level_button = Button("Mode Normal", GameProperties.win_size.x +100, GameProperties.win_size.y+100, 2, 1, "white", 'black',
-                      50, screen, True)
-"""
 
 clock = pygame.time.Clock()
 # screen.blit(bg, (0, 0))
 while running:
-    GameProperties.deltatime = clock.tick(200)
 
-    EnemiesManager.update()
+    GameProperties.deltatime = clock.tick(60)
 
-    GameConstants.AllSprites.clear(screen, group_background)
-    GameConstants.AllSprites.draw(screen)
-    GameConstants.AllSprites.update()
+    GameProperties.AllSprites.clear(GameProperties.screen, GameProperties.group_background)
+    GameProperties.AllSprites.draw(GameProperties.screen)
+    GameProperties.AllSprites.update()
+    GameProperties.UIGroup.draw(GameProperties.screen)
 
-    title(screen)
+    # GameProperties.screen.fill("black", GameProperties.screen_mask.)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-            sys.exit()
-
 
         elif event.type == pygame.WINDOWSIZECHANGED:
             prev_game_window = GameProperties.win_size.copy()
             update_game_win()
-            screen.fill("black")
-            screen.blit(pygame.transform.scale(background, GameProperties.win_size.size), GameProperties.win_size.topleft)
+            GameProperties.screen.fill("black")
+            GameProperties.screen.blit(pygame.transform.scale(GameProperties.background, GameProperties.win_size.size), GameProperties.win_size.topleft)
 
-            pygame.image.save(screen.copy(), "bg.png")
-            group_background = pygame.image.load("bg.png")
+            pygame.image.save(GameProperties.screen.copy(), "bg.png")
+            GameProperties.group_background = pygame.image.load("bg.png")
 
-            GameConstants.AllSprites.moveSprites(GameProperties.win_size, prev_game_window)
+            GameProperties.AllSprites.moveSprites(GameProperties.win_size, prev_game_window)
+            GameProperties.UIGroup.moveSprites(GameProperties.win_size, prev_game_window)
 
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_F11:
@@ -125,15 +103,15 @@ while running:
                 else:
                     pygame.display.set_mode(prev_window_size, pygame.RESIZABLE)
 
-                screen.fill("black")
-
-            if event.key == pygame.K_SPACE:
-                player.tirer()
+                GameProperties.screen.fill("black")
+            if event.key == pygame.K_ESCAPE:
+                UI.show_menu()
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            pass
-            #leave_game_button.check_click_quit()
-            #play_level_button.check_click_level()
+            GameProperties.ButtonGroup.update()
 
     pygame.display.flip()
 
+for on_going_thread in GameProperties.on_going_threads:
+    on_going_thread.cancel()
 pygame.quit()
+sys.exit()
