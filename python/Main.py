@@ -1,13 +1,12 @@
 import os
+import sys
 from math import gcd
 
 import pygame.transform
 
-from python.GameProperties import GameProperties
+from python import EnemiesSpawner
+from python.Groups import *
 from python.UIManager import UIManager
-from python.Groups import Groups
-import sys
-
 
 wanted_ratio = [8, 5]
 win_size = GameProperties.default_win_size.copy()
@@ -19,6 +18,8 @@ pygame.init()
 GameProperties.screen = pygame.display.set_mode((win_size[0], win_size[1]), pygame.RESIZABLE)
 
 background_rect = GameProperties.background.get_rect()
+
+
 
 def update_game_win() -> list:
     win_size = [pygame.display.get_window_size()[0], pygame.display.get_window_size()[1]]
@@ -68,7 +69,6 @@ running = True
 
 UIManager.show_starting_screen()
 
-
 clock = pygame.time.Clock()
 # screen.blit(bg, (0, 0))
 while running:
@@ -92,7 +92,8 @@ while running:
             prev_game_window = GameProperties.win_size.copy()
             update_game_win()
             GameProperties.screen.fill("black")
-            GameProperties.screen.blit(pygame.transform.scale(GameProperties.background, GameProperties.win_size.size), GameProperties.win_size.topleft)
+            GameProperties.screen.blit(pygame.transform.scale(GameProperties.background, GameProperties.win_size.size),
+                                       GameProperties.win_size.topleft)
 
             pygame.image.save(GameProperties.screen.copy(), "bg.png")
             GameProperties.group_background = pygame.image.load("bg.png")
@@ -112,10 +113,17 @@ while running:
                     pygame.display.set_mode(prev_window_size, pygame.RESIZABLE)
 
                 GameProperties.screen.fill("black")
-            if event.key == pygame.K_ESCAPE:
-                UIManager.show_menu()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             Groups.ButtonGroup.update()
+
+    if GameProperties.game_started and len(Groups.InvaderGroup.sprites()) == 0:
+        GameProperties.current_wave += 1
+        EnemiesSpawner.EnemiesManager.send_waves_levels(GameProperties.current_wave)
+
+    for sprite in Groups.AllSprites.sprites():
+        if sprite.rect.x < GameProperties.win_size.height + GameProperties.win_size.y:
+            Groups.AllSprites.remove(sprite)
+            sprite.kill()
 
     pygame.display.flip()
 

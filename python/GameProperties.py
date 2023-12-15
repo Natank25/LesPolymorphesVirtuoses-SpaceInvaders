@@ -45,4 +45,8 @@ class GameProperties(metaclass=MetaClassGP):
 
     group_background = Resources.UI.Images.background_menu_img
 
+    game_started = False
+
+    current_wave = 0
+
 

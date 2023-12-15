@@ -42,4 +42,5 @@ class Groups:
     PlayerGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
     BulletGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
     ButtonGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
+    EnemiesButtonGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
     UIGroup: UIGroup = UIGroup()

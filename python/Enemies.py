@@ -6,26 +6,41 @@ import pygame
 
 from python.GameProperties import GameProperties
 from python.Groups import Groups
-
 from python.Resources import Ennemies
 
 pygame.init()
 
+
+class Balle(pygame.sprite.Sprite):
+    def __init__(self, pos, speed=0.3, damage=1):
+
+        self.image = Ennemies.Images.Balle
+        self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * GameProperties.win_scale),
+                                                         int(self.image.get_height() * GameProperties.win_scale)))
+        self.rect = self.image.get_rect(center=pos)
+        self.speed = speed
+        self.damage = damage
+        super().__init__(Groups.BulletGroup, Groups.AllSprites)
+
+    def update(self):
+        self.rect.move_ip(0,50)
+
 class Invader(pygame.sprite.Sprite):
-    def __init__(self, speedx, speedy, health, image, shooter=False, ATKspeed=0, can_esquive=False):
+    def __init__(self, speedx, speedy, health, image, shooter=False, ATKspeed=0.05, can_esquive=False):
         self.image = image
         self.speedx = speedx
         self.speedy = speedy
         self.health = health
         self.shooter = shooter
-        self.ATKspeed = ATKspeed
+        self.next_shot = pygame.time.get_ticks() + 1 / ATKspeed
+        self.last_shot = pygame.time.get_ticks()
         self.lastEsquive = pygame.time.get_ticks()
         self.nextEsquive = pygame.time.get_ticks() + randint(500, 5000)
         self.canEsquive = can_esquive
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (
-            randint(GameProperties.win_size.x + 10, GameProperties.win_size.width - self.rect.width - 10),
-            GameProperties.win_size.y + 10)
+        self.ATKspeed = ATKspeed
+        self.rect = self.image.get_rect(topleft=(
+            randint(GameProperties.win_size.x + 10, GameProperties.win_size.width - self.image.get_width() - 10),
+            GameProperties.win_size.y + 10))
         super().__init__(Groups.InvaderGroup, Groups.AllSprites)
 
     def apply_damage(self, amount):
@@ -33,14 +48,15 @@ class Invader(pygame.sprite.Sprite):
 
     def avancer(self):
 
-        self.rect.move_ip(self.speedx * GameProperties.deltatime * GameProperties.win_scale, self.speedy * GameProperties.deltatime * GameProperties.win_scale)
+        self.rect.move_ip(self.speedx * GameProperties.deltatime * GameProperties.win_scale,
+                          self.speedy * GameProperties.deltatime * GameProperties.win_scale)
 
         if self.rect.x < GameProperties.win_size.x or self.rect.x + self.rect.width > GameProperties.win_size.x + GameProperties.win_size.width:
             self.speedx = -self.speedx
 
-    def tier(self):
+    def tirer(self):
         if self.shooter:
-            print("Pew pew !")
+            Balle(self.rect.center)
 
     def esquive(self):
         self.speedy = -self.speedy
@@ -51,8 +67,14 @@ class Invader(pygame.sprite.Sprite):
             self.lastEsquive = pygame.time.get_ticks()
             self.nextEsquive = pygame.time.get_ticks() + randint(500, 5000)
         self.avancer()
+
         if self.health < 0:
             self.kill()
+
+        if self.shooter and pygame.time.get_ticks() >= self.last_shot:
+            self.tirer()
+            self.last_shot = pygame.time.get_ticks()
+            self.next_shot = pygame.time.get_ticks() + 1 / self.ATKspeed
 
 
 class CommonInvader1(Invader):
@@ -132,7 +154,7 @@ class ShooterInvader1(Invader):
         super().__init__(EnemyAttributes.ShooterInvader1DefaultSpeedx.value + (GameProperties.difficulty / 10),
                          EnemyAttributes.ShooterInvader1DefaultSpeedy.value + (GameProperties.difficulty / 20),
                          EnemyAttributes.ShooterInvader1DefaultHealth.value * (1 + GameProperties.difficulty),
-                         'SpeedInvader1', shooter=True, ATKspeed=EnemyAttributes.ShooterInvader1DefaultSpeedATK.value)
+                         Ennemies.Images.SpeedInvader1, shooter=True)
 
 
 class ShooterInvader2(Invader):
@@ -387,9 +409,9 @@ class EnemyAttributes(Enum):
 
     # shooter
     ShooterInvader1DefaultHealth = 20
-    ShooterInvader1DefaultSpeedx = 2
+    ShooterInvader1DefaultSpeedx = 0.2
     ShooterInvader1DefaultSpeedy = 0.2
-    ShooterInvader1DefaultSpeedATK = 1
+    ShooterInvader1DefaultSpeedATK = 0.05
 
     ShooterInvader2DefaultHealth = 50
     ShooterInvader2DefaultSpeedx = 2
@@ -526,7 +548,7 @@ class EnemyType(Enum):
     TANKINVADER3 = "TankInvader3", TankInvader3
 
     # shooter
-    SHOOTERINVADER1 = "ShooterInvader1", SpeedInvader1
+    SHOOTERINVADER1 = "ShooterInvader1", ShooterInvader1
     SHOOTERINVADER2 = "ShooterInvader2", ShooterInvader2
     SHOOTERINVADER3 = "ShooterInvader3", ShooterInvader3
 

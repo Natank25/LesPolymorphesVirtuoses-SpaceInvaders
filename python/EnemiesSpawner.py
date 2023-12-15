@@ -1,7 +1,8 @@
 import threading
 
-from GameProperties import GameProperties
 from Enemies import EnemyType
+from GameProperties import GameProperties
+
 
 class EnemiesManager:
 
@@ -20,6 +21,7 @@ class EnemiesManager:
             case 1:
                 for i in range(3 + GameProperties.difficulty):
                     EnemiesManager.spawnEnemy(EnemyType.COMMONINVADER1, 1500 * i)
+                    EnemiesManager.spawnEnemy(EnemyType.SHOOTERINVADER1, 500 * i)
 
             case 2:
                 for i in range(2 + GameProperties.difficulty):

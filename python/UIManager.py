@@ -1,15 +1,12 @@
 import math
-import random
 import sys
 
 import pygame
 
-from EnemiesSpawner import EnemiesManager
-from Groups import Groups
-from Groups import AllSpritesGroup
 from Player import Player
 from python import Resources
 from python.GameProperties import GameProperties
+from python.Groups import Groups
 
 pygame.init()
 
@@ -33,20 +30,20 @@ class UIManager:
             if self.is_pressed(mouse_pos):
                 self.function()
 
+
     class StartingScreen:
 
-        class StartGameText():
+        class StartGameText(pygame.sprite.Sprite):
 
             def __init__(self):
                 font = pygame.font.SysFont('arialblack', 35, bold=True)
                 self.image = font.render("Appuyez pour jouer", True, (255, 255, 255)).convert_alpha()
                 self.rect = self.image.get_rect(center=(GameProperties.win_size.x + GameProperties.win_size.width * 0.5, GameProperties.win_size.y + GameProperties.win_size.height * 0.9))
                 self.function = lambda: self.update_alpha()
+                super().__init__(Groups.UIGroup)
 
             def update_alpha(self):
-                GameProperties.screen.blit(GameProperties.group_background, self.rect, self.rect)
                 self.image.set_alpha(int((math.sin(pygame.time.get_ticks() / 1000 * 1.5) + 1) * 123))
-                GameProperties.screen.blit(self.image, self.rect)
 
 
         @staticmethod
@@ -59,7 +56,7 @@ class UIManager:
             keys = pygame.key.get_pressed()
             mouse = pygame.mouse.get_pressed()
             if any(keys) or any(mouse):
-                UIManager.show_game()
+                UIManager.show_menu()
 
     class Menu:
 
@@ -75,6 +72,7 @@ class UIManager:
 
             UIManager.Menu.create_leave_game_button(GameProperties.win_size.x + GameProperties.win_size.width / 2, GameProperties.win_size.y + GameProperties.win_size.height * 0.80)
 
+            
         @staticmethod
         def hide_menu():
             for content in UIManager.content_list:
@@ -158,7 +156,7 @@ class UIManager:
         UIManager.Game.show_game()
         UIManager.shown_screen = UIManager.Game
 
-        EnemiesManager.send_waves_levels(1)
+        GameProperties.game_started = True
 
     @staticmethod
     def show_shop():

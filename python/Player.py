@@ -1,12 +1,15 @@
-import os
 from random import randint
 
+import pygame
+
 from python import Resources
-from python.Groups import *
+from python.GameProperties import GameProperties
+from python.Groups import Groups
 
 
 class PlayerProperties:
     SPEED = 0.3
+
 
 class Balle(pygame.sprite.Sprite):
     def __init__(self, ship: pygame.rect.Rect, speed=0.3, damage=1, fire_speed=1):
@@ -26,8 +29,7 @@ class Balle(pygame.sprite.Sprite):
             self.rect.y -= self.speed * GameProperties.deltatime * GameProperties.win_scale
         else:
             self.kill()
-        collided_sprites = pygame.sprite.groupcollide(Groups.BulletGroup, Groups.InvaderGroup, True,
-                                                      False)
+        collided_sprites = pygame.sprite.groupcollide(Groups.BulletGroup, Groups.InvaderGroup, True, False)
         for bullet in collided_sprites:
             for invader in collided_sprites[bullet]:
                 invader.apply_damage(bullet.damage)
@@ -39,10 +41,8 @@ class Player(pygame.sprite.Sprite):
         self.image = Resources.Player.Images.Vaisseau_Base
         self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * GameProperties.win_scale),
                                                          int(self.image.get_height() * GameProperties.win_scale)))
-        self.rect = self.image.get_rect()
-        self.rect.x = randint(GameProperties.win_size.x,
-                                     GameProperties.win_size.x + GameProperties.win_size.width - self.rect.width)
-        self.rect.y = GameProperties.win_size.height - 100 * GameProperties.win_scale
+        self.rect = self.image.get_rect(topleft=(randint(GameProperties.win_size.x,
+                              GameProperties.win_size.x + GameProperties.win_size.width - self.image.get_width()),GameProperties.win_size.height - 100 * GameProperties.win_scale))
         self.timeLastShot = pygame.time.get_ticks()
         self.cooldown = 500
 
