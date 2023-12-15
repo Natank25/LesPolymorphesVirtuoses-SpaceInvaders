@@ -7,11 +7,13 @@ import pygame
 from python.GameProperties import GameProperties
 from python.Groups import Groups
 
+from python.Resources import Ennemies
+
+pygame.init()
 
 class Invader(pygame.sprite.Sprite):
-    def __init__(self, speedx, speedy, health, img_name, shooter=False, ATKspeed=0, can_esquive=False, file_ext="png"):
-        self.image_path = os.path.join("img", img_name + "." + file_ext)
-        self.image = pygame.image.load(self.image_path)
+    def __init__(self, speedx, speedy, health, image, shooter=False, ATKspeed=0, can_esquive=False):
+        self.image = image
         self.speedx = speedx
         self.speedy = speedy
         self.health = health
@@ -31,8 +33,7 @@ class Invader(pygame.sprite.Sprite):
 
     def avancer(self):
 
-        self.rect.y += self.speedy * GameProperties.deltatime * GameProperties.win_scale
-        self.rect.x += self.speedx * GameProperties.deltatime * GameProperties.win_scale
+        self.rect.move_ip(self.speedx * GameProperties.deltatime * GameProperties.win_scale, self.speedy * GameProperties.deltatime * GameProperties.win_scale)
 
         if self.rect.x < GameProperties.win_size.x or self.rect.x + self.rect.width > GameProperties.win_size.x + GameProperties.win_size.width:
             self.speedx = -self.speedx
@@ -59,7 +60,7 @@ class CommonInvader1(Invader):
         super().__init__(EnemyAttributes.CommonInvaders1DefaultSpeedx.value * GameProperties.difficulty,
                          EnemyAttributes.CommonInvaders1DefaultSpeedy.value * GameProperties.difficulty / 2,
                          EnemyAttributes.CommonInvaders1DefaultHealth.value * (1 + GameProperties.difficulty),
-                         "CommonInvader1")
+                         Ennemies.Images.CommonInvader1)
 
 
 class CommonInvader2(Invader):
@@ -67,7 +68,7 @@ class CommonInvader2(Invader):
         super().__init__(EnemyAttributes.CommonInvaders2DefaultSpeedx.value + (GameProperties.difficulty / 10),
                          EnemyAttributes.CommonInvaders2DefaultSpeedy.value + (GameProperties.difficulty / 20),
                          EnemyAttributes.CommonInvaders2DefaultHealth.value * (1 + GameProperties.difficulty),
-                         "CommonInvader2")
+                         Ennemies.Images.CommonInvader2)
 
 
 class CommonInvader3(Invader):
@@ -75,7 +76,7 @@ class CommonInvader3(Invader):
         super().__init__(EnemyAttributes.CommonInvaders3DefaultSpeedx.value + (GameProperties.difficulty / 10),
                          EnemyAttributes.CommonInvaders3DefaultSpeedy.value + (GameProperties.difficulty / 20),
                          EnemyAttributes.CommonInvaders3DefaultHealth.value * (1 + GameProperties.difficulty),
-                         "CommonInvader2")
+                         Ennemies.Images.CommonInvader3)
 
 
 class SpeedInvader1(Invader):
@@ -83,7 +84,7 @@ class SpeedInvader1(Invader):
         super().__init__(EnemyAttributes.SpeedInvader1DefaultSpeedx.value + (GameProperties.difficulty / 10),
                          EnemyAttributes.SpeedInvader1DefaultSpeedy.value + (GameProperties.difficulty / 20),
                          EnemyAttributes.SpeedInvader2DefaultHealth.value * (1 + GameProperties.difficulty),
-                         "SpeedInvader1")
+                         Ennemies.Images.SpeedInvader1)
 
 
 class SpeedInvader2(Invader):
@@ -91,7 +92,7 @@ class SpeedInvader2(Invader):
         super().__init__(EnemyAttributes.SpeedInvader2DefaultSpeedx.value + (GameProperties.difficulty / 10),
                          EnemyAttributes.SpeedInvader2DefaultSpeedy.value + (GameProperties.difficulty / 20),
                          EnemyAttributes.SpeedInvader2DefaultHealth.value * (1 + GameProperties.difficulty),
-                         "SpeedInvader2")
+                         Ennemies.Images.SpeedInvader2)
 
 
 class SpeedInvader3(Invader):
@@ -99,7 +100,7 @@ class SpeedInvader3(Invader):
         super().__init__(EnemyAttributes.SpeedInvader2DefaultSpeedx.value + (GameProperties.difficulty / 10),
                          EnemyAttributes.SpeedInvader2DefaultSpeedy.value + (GameProperties.difficulty / 20),
                          EnemyAttributes.SpeedInvader2DefaultHealth.value * (1 + GameProperties.difficulty),
-                         "SpeedInvader2")
+                         Ennemies.Images.SpeedInvader3)
 
 
 class TankInvader1(Invader):
@@ -107,7 +108,7 @@ class TankInvader1(Invader):
         super().__init__(EnemyAttributes.TankInvader1DefaultSpeedx.value + (GameProperties.difficulty / 10),
                          EnemyAttributes.TankInvader1DefaultSpeedy.value + (GameProperties.difficulty / 20),
                          EnemyAttributes.TankInvader1DefaultHealth.value * (1 + GameProperties.difficulty),
-                         "SpeedInvader1")
+                         Ennemies.Images.TankInvader1)
 
 
 class TankInvader2(Invader):
@@ -115,7 +116,7 @@ class TankInvader2(Invader):
         super().__init__(EnemyAttributes.TankInvader2DefaultSpeedx.value + (GameProperties.difficulty / 10),
                          EnemyAttributes.TankInvader2DefaultSpeedy.value + (GameProperties.difficulty / 20),
                          EnemyAttributes.TankInvader2DefaultHealth.value * (1 + GameProperties.difficulty),
-                         "SpeedInvader1")
+                         TankInvader2)
 
 
 class TankInvader3(Invader):
@@ -123,7 +124,7 @@ class TankInvader3(Invader):
         super().__init__(EnemyAttributes.TankInvader3DefaultSpeedx.value + (GameProperties.difficulty / 10),
                          EnemyAttributes.TankInvader3DefaultSpeedy.value + (GameProperties.difficulty / 20),
                          EnemyAttributes.TankInvader3DefaultHealth.value * (1 + GameProperties.difficulty),
-                         "SpeedInvader1")
+                         TankInvader3)
 
 
 class ShooterInvader1(Invader):

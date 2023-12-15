@@ -2,6 +2,8 @@ import pygame
 
 from python.GameProperties import GameProperties
 
+pygame.init()
+
 
 class AllSpritesGroup(pygame.sprite.RenderClear):
     def __init__(self, *sprites):
@@ -34,6 +36,7 @@ class UIGroup(AllSpritesGroup):
 
 
 class Groups:
+
     AllSprites: AllSpritesGroup = AllSpritesGroup()
     InvaderGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
     PlayerGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()

@@ -4,9 +4,10 @@ from math import gcd
 import pygame.transform
 
 from python.GameProperties import GameProperties
-from python.UI_Manager import UI_Manager
+from python.UIManager import UIManager
 from python.Groups import Groups
 import sys
+
 
 wanted_ratio = [8, 5]
 win_size = GameProperties.default_win_size.copy()
@@ -18,7 +19,6 @@ pygame.init()
 GameProperties.screen = pygame.display.set_mode((win_size[0], win_size[1]), pygame.RESIZABLE)
 
 background_rect = GameProperties.background.get_rect()
-
 
 def update_game_win() -> list:
     win_size = [pygame.display.get_window_size()[0], pygame.display.get_window_size()[1]]
@@ -66,12 +66,14 @@ pygame.display.set_caption("Space Invaders")
 
 running = True
 
-UI_Manager.show_menu()
+UIManager.show_starting_screen()
 
 
 clock = pygame.time.Clock()
 # screen.blit(bg, (0, 0))
 while running:
+
+    UIManager.update()
 
     GameProperties.deltatime = clock.tick(60)
 
@@ -111,7 +113,7 @@ while running:
 
                 GameProperties.screen.fill("black")
             if event.key == pygame.K_ESCAPE:
-                UI_Manager.show_menu()
+                UIManager.show_menu()
         elif event.type == pygame.MOUSEBUTTONDOWN:
             Groups.ButtonGroup.update()
 
@@ -119,5 +121,6 @@ while running:
 
 for on_going_thread in GameProperties.on_going_threads:
     on_going_thread.cancel()
+
 pygame.quit()
 sys.exit()

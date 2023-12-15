@@ -2,9 +2,12 @@ import os
 
 import pygame
 
+from python import Resources
+
+pygame.init()
 
 class MetaClassGP(type):
-    background = pygame.image.load(os.path.join("img", "background_menu.png"))
+    background = Resources.UI.Images.background_menu_img
 
     def __setattr__(self, key, value):
         if key == 'background':
@@ -38,8 +41,8 @@ class GameProperties(metaclass=MetaClassGP):
 
     screen_mask = None
 
-    background = pygame.image.load(os.path.join("img", "background_menu.png"))
+    background = Resources.UI.Images.background_menu_img
 
-    group_background = pygame.image.load(os.path.join("img", "background_menu.png"))
+    group_background = Resources.UI.Images.background_menu_img
 
 

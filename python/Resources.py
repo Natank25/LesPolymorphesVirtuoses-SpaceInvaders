@@ -1,7 +1,7 @@
 import pygame
-import os
 
 
+pygame.init()
 class UI:
     class Images:
         play_game_img = pygame.image.load("../img/UI/buttons/play_button.png")
@@ -23,17 +23,17 @@ class Player:
 
 class Ennemies:
     class Images:
-        CommonInvader1 = pygame.image.load(os.path.join("..","img", "CommonInvader1.png"))
-        CommonInvader2 = pygame.image.load(os.path.join("..","img", "CommonInvader2.png"))
-        CommonInvader3 = pygame.image.load(os.path.join("..","img", "CommonInvader3.png"))
+        CommonInvader1 = pygame.image.load("../img/CommonInvader1.png")
+        CommonInvader2 = pygame.image.load("../img/CommonInvader2.png")
+        CommonInvader3 = pygame.image.load("../img/CommonInvader2.png")
 
-        SpeedInvader1 = pygame.image.load(os.path.join("..","img", "SpeedInvader1.png"))
-        SpeedInvader2 = pygame.image.load(os.path.join("..","img", "SpeedInvader2.png"))
-        SpeedInvader3 = pygame.image.load(os.path.join("..","img", "SpeedInvader3.png"))
+        SpeedInvader1 = pygame.image.load("../img/SpeedInvader1.png")
+        SpeedInvader2 = pygame.image.load("../img/SpeedInvader2.png")
+        SpeedInvader3 = pygame.image.load("../img/SpeedInvader2.png")
 
-        TankInvader1 = pygame.image.load(os.path.join("..","img", "TankInvader1.png"))
-        TankInvader2 = pygame.image.load(os.path.join("..","img", "TankInvader2.png"))
-        TankInvader3 = pygame.image.load(os.path.join("..","img", "TankInvader3.png"))
+        TankInvader1 = pygame.image.load("../img/Ships/UFO.png")
+        TankInvader2 = pygame.image.load("../img/Ships/UFO.png")
+        TankInvader3 = pygame.image.load("../img/Ships/UFO.png")
 
     class Sons:
         pass
