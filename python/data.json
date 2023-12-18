@@ -1,6 +1,18 @@
 {
-  "player1": {
-    "coins": 1000,
-    "gems": 100
+  "players": {
+    "default_player": {
+      "coins": 0,
+      "gems": 0,
+      "selected_skin": 1
+    }
+  },
+  "waves_game": {
+    "current_wave": 0
+  },
+  "shops": {
+    "coins": {
+      "unlocked_upgrade": [
+      ]
+    }
   }
 }

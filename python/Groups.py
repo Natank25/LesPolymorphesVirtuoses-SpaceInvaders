@@ -1,11 +1,12 @@
 import pygame
 
-from python.GameProperties import GameProperties
+from python import GameProperties
 
 pygame.init()
 
 
-class AllSpritesGroup(pygame.sprite.RenderClear):
+
+class AllSprites(pygame.sprite.RenderClear):
     def __init__(self, *sprites):
         super().__init__(*sprites)
 
@@ -30,16 +31,15 @@ class AllSpritesGroup(pygame.sprite.RenderClear):
             sprite.rect = sprite.image.get_rect(topleft=(new_x, new_y))
 
 
-class UIGroup(AllSpritesGroup):
+class UIGroup(AllSprites):
     def __init__(self, *sprites):
         super().__init__(*sprites)
 
 
-class Groups:
-
-    AllSprites: AllSpritesGroup = AllSpritesGroup()
-    InvaderGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
-    PlayerGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
-    BulletGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
-    ButtonGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
-    UIGroup: UIGroup = UIGroup()
+AllSpritesGroup: AllSprites = AllSprites()
+InvaderGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
+PlayerGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
+BulletGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
+EnemiesBulletGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
+ButtonGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
+UIGroup: UIGroup = UIGroup()

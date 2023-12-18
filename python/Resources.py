@@ -2,6 +2,8 @@ import pygame
 
 
 pygame.init()
+
+# TODO: add fonts here
 class UI:
     class Images:
         play_game_img = pygame.image.load("../img/UI/buttons/play_button.png")
@@ -23,6 +25,8 @@ class Player:
 
 class Ennemies:
     class Images:
+        Balle = pygame.image.load("../img/balle.png")
+
         CommonInvader1 = pygame.image.load("../img/CommonInvader1.png")
         CommonInvader2 = pygame.image.load("../img/CommonInvader2.png")
         CommonInvader3 = pygame.image.load("../img/CommonInvader2.png")
