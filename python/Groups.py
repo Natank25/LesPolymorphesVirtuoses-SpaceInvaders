@@ -5,7 +5,6 @@ from python import GameProperties
 pygame.init()
 
 
-
 class AllSprites(pygame.sprite.RenderClear):
     def __init__(self, *sprites):
         super().__init__(*sprites)

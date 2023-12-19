@@ -176,8 +176,8 @@ class Boss(Utils.Sprite):
         self.image = image
         self.rect = self.image.get_rect(topleft=(randint(GameProperties.win_size.x, GameProperties.win_size.x + GameProperties.win_size.width - self.image.get_width()),hauteur))
 
-        self.coindrop = health * GameProperties.difficulty
-        self.gemdrop = 1
+        self.coin_drop = health * GameProperties.difficulty
+        self.gem_drop = 1
         super().__init__(Groups.InvaderGroup)
 
     def update(self):
@@ -189,8 +189,8 @@ class Boss(Utils.Sprite):
 
         if self.health < 0:
             self.kill()
-            GameProperties.coins += self.coindrop
-            if self.gemdrop == random.randint(0, 100):
+            GameProperties.coins += self.coin_drop
+            if self.gem_drop == random.randint(0, 100):
                 GameProperties.gems += 1 + GameProperties.difficulty
 
         if GameProperties.does_player_exists and self.rect.center[1] > GameProperties.win_size.height + GameProperties.win_size.y:

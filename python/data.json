@@ -1,18 +1,25 @@
 {
   "players": {
     "default_player": {
-      "coins": 0,
       "gems": 0,
-      "selected_skin": 1
+      "coins": 0
     }
   },
-  "waves_game": {
-    "current_wave": 0
+  "game_properties": {
+    "waves_game": {
+      "current_wave": 0
+    },
+    "difficulty": {
+      "current_difficulty": 1
+    }
   },
   "shops": {
     "coins": {
-      "unlocked_upgrade": [
-      ]
+      "damage_upgrade": 0,
+      "health_upgrade": 0
+    },
+    "gems": {
+      "unlocked_upgrade": []
     }
   }
 }

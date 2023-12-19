@@ -1,13 +1,13 @@
 import pygame
 
 from python import Resources
+from python.DataManager import DataManager
 
 pygame.init()
 
-
 win_size: pygame.Rect = pygame.Rect(0, 0, 1920, 1080)
 
-difficulty = 1
+difficulty = DataManager.get_diffculty()
 
 deltatime = 0
 
@@ -23,17 +23,23 @@ group_background = Resources.UI.Images.background_menu_img
 
 game_started = False
 
-current_wave = 0
+current_wave = DataManager.get_current_waves()
 
 paused = False
 
-coins = 0
+coins = DataManager.get_coins_player()
 
-gems = 0
+gems = DataManager.get_gems_player()
 
 does_player_exists = False
 
 game_overed = False
+
+coin_shop = DataManager.get_coin_shop()
+
+
+
+gems_shop = DataManager.get_gems_shop()
 
 
 def set_background(value):
@@ -47,3 +53,7 @@ def set_background(value):
     background = value
 
 
+def damage_upgrade():
+    global coins
+    coin_shop["damage_upgrade"] += 1
+    coins -= coin_shop["damage_upgrade"]**1.5

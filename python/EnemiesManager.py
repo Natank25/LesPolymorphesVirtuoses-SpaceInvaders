@@ -261,14 +261,13 @@ def update():
     global on_going_wave
     on_going_wave = len(next_spawns) != 0
 
-    for dict in next_spawns:
-        for enemy_type, delay in dict.items():
+    for i_dict in range(len(next_spawns)-1,-1,-1):
+        for enemy_type, delay in next_spawns[i_dict].items():
             if GameProperties.paused:
-                next_spawns[enemy_type] += int(GameProperties.deltatime)
-                pass
+                next_spawns[i_dict][enemy_type] += int(GameProperties.deltatime)
 
             if delay <= pygame.time.get_ticks():
-                next_spawns.remove({enemy_type: delay})
+                next_spawns.pop(i_dict)
                 spawnEnemy(enemy_type)
 
 

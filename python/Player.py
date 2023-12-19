@@ -1,17 +1,16 @@
 from random import randint
 
-from python import Resources, Utils
-from python import Groups
-from python import GameProperties
 import pygame
 
+from python import GameProperties
+from python import Groups
+from python import Resources, Utils
 
 
 class PlayerProperties:
     SPEED = 0.3
-    DAMAGE = 1
-    DAMAGE_UPGRADE = 1
-    HEALTH_UPGRADE = 1
+    DAMAGE = int((GameProperties.coin_shop["damage_upgrade"]+1) ** (1.4 - (GameProperties.difficulty / 100)))
+    atk_speed = 1
 
 
 class Balle(Utils.Sprite):
@@ -24,16 +23,20 @@ class Balle(Utils.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = ship.center
         self.speed = speed
+        self.damage = 1
 
     def update(self):
         super().update()
+
+        self.damage = PlayerProperties.DAMAGE
+
         if self.rect.bottom > 0:
             self.rect.y -= self.speed * GameProperties.deltatime * GameProperties.win_scale
         else:
             self.kill()
         collided_sprites = pygame.sprite.spritecollide(self, Groups.InvaderGroup, False)
         for invader in collided_sprites:
-            invader.apply_damage(PlayerProperties.DAMAGE)
+            invader.apply_damage(self.damage)
             self.kill()
 
 
@@ -87,6 +90,7 @@ class Player(Utils.Sprite):
 
     def update(self):
         super().update()
+
         keys = pygame.key.get_pressed()
         self.controls(keys)
 

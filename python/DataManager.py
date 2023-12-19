@@ -1,7 +1,6 @@
 import json
 
 from python import GameProperties
-from python.Player import PlayerProperties
 
 
 class DataManager:
@@ -16,7 +15,7 @@ class DataManager:
                 "default_player": {
                     "gems": GameProperties.gems,
                     "coins": GameProperties.coins
-                },
+                }
             },
 
             "game_properties": {
@@ -26,17 +25,12 @@ class DataManager:
 
                 "difficulty": {
                     "current_difficulty": GameProperties.difficulty
-                },
+                }
             },
 
             "shops": {
-                "coins": {
-                    "damage_upgrade": PlayerProperties.DAMAGE_UPGRADE,
-                    "health_upagrade": PlayerProperties.HEALTH_UPGRADE
-                },
-                "gems": {
-                    "unlocked_upgrade": []
-                }
+                "coins": GameProperties.coin_shop,
+                "gems": GameProperties.gems_shop
             }
         }
 
@@ -61,16 +55,20 @@ class DataManager:
             return json.load(f)["players"]["default_player"]["gems"]
 
     @staticmethod
-    def get_waves():
+    def get_current_waves():
         with open("data.json", 'rt') as f:
-            return json.load(f)["waves_game"]["current_wave"]
+            return json.load(f)["game_properties"]["waves_game"]["current_wave"]
 
     @staticmethod
     def get_diffculty():
         with open("data.json", 'rt') as f:
-            return json.load(f)["difficulty"]["current_difficulty"]
+            return json.load(f)["game_properties"]["difficulty"]["current_difficulty"]
 
     @staticmethod
-    def get_shop():
+    def get_coin_shop():
         with open("data.json", "rt") as f:
-            return json.load(f)["coins"]["unlocked_upgrade"], json.load(f)["gems"]["unlocked_upgrade"]
+            return json.load(f)["shops"]["coins"]
+    @staticmethod
+    def get_gems_shop():
+        with open("data.json", "rt") as f:
+            return json.load(f)["shops"]["gems"]

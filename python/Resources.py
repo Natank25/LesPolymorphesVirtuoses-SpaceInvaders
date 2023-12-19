@@ -9,6 +9,10 @@ class UI:
         play_game_img = pygame.image.load("../img/UI/buttons/play_button.png")
         background_img = pygame.image.load("../img/background.png")
         background_menu_img = pygame.image.load("../img/background_menu.png")
+        # settings_button_img
+        # resume_button_img
+        # shop_button_img
+        quit_button_img = pygame.image.load("../img/UI/buttons/quit_button.png")
 
     class Sons:
         pass

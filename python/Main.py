@@ -7,6 +7,7 @@ import pygame.transform
 from python import Groups
 from python import EnemiesManager
 from python import GameProperties
+from python.DataManager import DataManager
 from python.Player import Player
 from python import UIManager
 
@@ -83,9 +84,9 @@ while running:
 
     if not GameProperties.paused:
         Groups.AllSpritesGroup.draw(GameProperties.screen)
-        Groups.UIGroup.draw(GameProperties.screen)
         Groups.AllSpritesGroup.update()
 
+    Groups.UIGroup.draw(GameProperties.screen)
     Groups.UIGroup.update()
 
     for event in pygame.event.get():
@@ -100,7 +101,7 @@ while running:
 
             """pygame.image.save(GameProperties.screen.copy(), "bg.png")
             GameProperties.group_background = pygame.image.load("bg.png")"""
-            GameProperties.set_group_background(GameProperties.screen.copy())
+            GameProperties.group_background = GameProperties.screen.copy()
 
             Groups.AllSpritesGroup.moveSprites(GameProperties.win_size, prev_game_window)
             Groups.UIGroup.moveSprites(GameProperties.win_size, prev_game_window)
@@ -123,14 +124,17 @@ while running:
                 if GameProperties.paused:
                     UIManager.show_pause()
                 else:
-                    UIManager.show_game()
+                    UIManager.resume_game()
 
             elif event.key == pygame.K_m:
                 EnemiesManager.spawn_current_wave()
             elif event.key == pygame.K_p:
                 EnemiesManager.kill_all()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                Groups.ButtonGroup.update(button_group_update=True)
 
-    if GameProperties.game_started and len(Groups.InvaderGroup.sprites()) == 0 and not EnemiesManager.on_going_wave:
+    if GameProperties.game_started and len(Groups.InvaderGroup.sprites()) == 0 and len(EnemiesManager.next_spawns) == 0:
         GameProperties.current_wave += 1
         if not GameProperties.does_player_exists:
             UIManager.content_list.append(Player())
@@ -141,8 +145,6 @@ while running:
         GameProperties.game_overed = False
 
     pygame.display.flip()
-
-
 
 
 pygame.quit()
