@@ -1,6 +1,25 @@
 {
-  "player1": {
-    "coins": 1000,
-    "gems": 100
+  "players": {
+    "default_player": {
+      "gems": 0,
+      "coins": 0
+    }
+  },
+  "game_properties": {
+    "waves_game": {
+      "current_wave": 0
+    },
+    "difficulty": {
+      "current_difficulty": 1
+    }
+  },
+  "shops": {
+    "coins": {
+      "damage_upgrade": 0,
+      "health_upgrade": 0
+    },
+    "gems": {
+      "unlocked_upgrade": []
+    }
   }
 }

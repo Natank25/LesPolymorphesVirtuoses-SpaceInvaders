@@ -4,9 +4,12 @@ from math import gcd
 
 import pygame.transform
 
-from python import EnemiesSpawner
-from python.Groups import *
-from python.UIManager import UIManager
+from python import Groups
+from python import EnemiesManager
+from python import GameProperties
+from python.DataManager import DataManager
+from python.Player import Player
+from python import UIManager
 
 wanted_ratio = [8, 5]
 win_size = GameProperties.default_win_size.copy()
@@ -18,7 +21,6 @@ pygame.init()
 GameProperties.screen = pygame.display.set_mode((win_size[0], win_size[1]), pygame.RESIZABLE)
 
 background_rect = GameProperties.background.get_rect()
-
 
 
 def update_game_win() -> list:
@@ -67,22 +69,25 @@ pygame.display.set_caption("Space Invaders")
 
 running = True
 
+# UIManager.show_game()
 UIManager.show_starting_screen()
-
 clock = pygame.time.Clock()
-# screen.blit(bg, (0, 0))
 while running:
 
     UIManager.update()
+    EnemiesManager.update()
 
     GameProperties.deltatime = clock.tick(60)
 
-    Groups.AllSprites.clear(GameProperties.screen, GameProperties.group_background)
-    Groups.AllSprites.draw(GameProperties.screen)
-    Groups.AllSprites.update()
-    Groups.UIGroup.draw(GameProperties.screen)
+    Groups.AllSpritesGroup.clear(GameProperties.screen, GameProperties.group_background)
+    Groups.UIGroup.clear(GameProperties.screen, GameProperties.group_background)
 
-    # GameProperties.screen.fill("black", GameProperties.screen_mask.)
+    if not GameProperties.paused:
+        Groups.AllSpritesGroup.draw(GameProperties.screen)
+        Groups.AllSpritesGroup.update()
+
+    Groups.UIGroup.draw(GameProperties.screen)
+    Groups.UIGroup.update()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -92,13 +97,13 @@ while running:
             prev_game_window = GameProperties.win_size.copy()
             update_game_win()
             GameProperties.screen.fill("black")
-            GameProperties.screen.blit(pygame.transform.scale(GameProperties.background, GameProperties.win_size.size),
-                                       GameProperties.win_size.topleft)
+            GameProperties.screen.blit(pygame.transform.scale(GameProperties.background, GameProperties.win_size.size), GameProperties.win_size.topleft)
 
-            pygame.image.save(GameProperties.screen.copy(), "bg.png")
-            GameProperties.group_background = pygame.image.load("bg.png")
+            """pygame.image.save(GameProperties.screen.copy(), "bg.png")
+            GameProperties.group_background = pygame.image.load("bg.png")"""
+            GameProperties.group_background = GameProperties.screen.copy()
 
-            Groups.AllSprites.moveSprites(GameProperties.win_size, prev_game_window)
+            Groups.AllSpritesGroup.moveSprites(GameProperties.win_size, prev_game_window)
             Groups.UIGroup.moveSprites(GameProperties.win_size, prev_game_window)
 
         elif event.type == pygame.KEYDOWN:
@@ -113,22 +118,34 @@ while running:
                     pygame.display.set_mode(prev_window_size, pygame.RESIZABLE)
 
                 GameProperties.screen.fill("black")
+
+            if event.key == pygame.K_ESCAPE:
+                GameProperties.paused = not GameProperties.paused
+                if GameProperties.paused:
+                    UIManager.show_pause()
+                else:
+                    UIManager.resume_game()
+
+            elif event.key == pygame.K_m:
+                EnemiesManager.spawn_current_wave()
+            elif event.key == pygame.K_p:
+                EnemiesManager.kill_all()
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            Groups.ButtonGroup.update()
+            if event.button == 1:
+                Groups.ButtonGroup.update(button_group_update=True)
 
-    if GameProperties.game_started and len(Groups.InvaderGroup.sprites()) == 0:
+    if GameProperties.game_started and len(Groups.InvaderGroup.sprites()) == 0 and len(EnemiesManager.next_spawns) == 0:
         GameProperties.current_wave += 1
-        EnemiesSpawner.EnemiesManager.send_waves_levels(GameProperties.current_wave)
+        if not GameProperties.does_player_exists:
+            UIManager.content_list.append(Player())
+        EnemiesManager.send_waves_levels(GameProperties.current_wave)
 
-    for sprite in Groups.AllSprites.sprites():
-        if sprite.rect.x < GameProperties.win_size.height + GameProperties.win_size.y:
-            Groups.AllSprites.remove(sprite)
-            sprite.kill()
+    if GameProperties.game_overed:
+        UIManager.show_game_over()
+        GameProperties.game_overed = False
 
     pygame.display.flip()
 
-for on_going_thread in GameProperties.on_going_threads:
-    on_going_thread.cancel()
 
 pygame.quit()
 sys.exit()

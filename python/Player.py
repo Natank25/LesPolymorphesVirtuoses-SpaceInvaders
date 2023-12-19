@@ -2,18 +2,20 @@ from random import randint
 
 import pygame
 
-from python import Resources
-from python.GameProperties import GameProperties
-from python.Groups import Groups
+from python import GameProperties
+from python import Groups
+from python import Resources, Utils
 
 
 class PlayerProperties:
     SPEED = 0.3
+    DAMAGE = int((GameProperties.coin_shop["damage_upgrade"]+1) ** (1.4 - (GameProperties.difficulty / 100)))
+    atk_speed = 1
 
 
-class Balle(pygame.sprite.Sprite):
-    def __init__(self, ship: pygame.rect.Rect, speed=0.3, damage=1, fire_speed=1):
-        super().__init__(Groups.BulletGroup, Groups.AllSprites)
+class Balle(Utils.Sprite):
+    def __init__(self, ship: pygame.rect.Rect, speed=0.3):
+        super().__init__(Groups.BulletGroup)
 
         self.image = Resources.Player.Images.Balle
         self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * GameProperties.win_scale),
@@ -21,30 +23,40 @@ class Balle(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = ship.center
         self.speed = speed
-        self.damage = damage
-        self.fire_speed = fire_speed
+        self.damage = 1
 
     def update(self):
+        super().update()
+
+        self.damage = PlayerProperties.DAMAGE
+
         if self.rect.bottom > 0:
             self.rect.y -= self.speed * GameProperties.deltatime * GameProperties.win_scale
         else:
             self.kill()
-        collided_sprites = pygame.sprite.groupcollide(Groups.BulletGroup, Groups.InvaderGroup, True, False)
-        for bullet in collided_sprites:
-            for invader in collided_sprites[bullet]:
-                invader.apply_damage(bullet.damage)
+        collided_sprites = pygame.sprite.spritecollide(self, Groups.InvaderGroup, False)
+        for invader in collided_sprites:
+            invader.apply_damage(self.damage)
+            self.kill()
 
 
-class Player(pygame.sprite.Sprite):
+# TODO: add lives/health
+class Player(Utils.Sprite):
     def __init__(self):
-        super().__init__(Groups.PlayerGroup, Groups.AllSprites)
+        super().__init__(Groups.PlayerGroup)
         self.image = Resources.Player.Images.Vaisseau_Base
         self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * GameProperties.win_scale),
                                                          int(self.image.get_height() * GameProperties.win_scale)))
-        self.rect = self.image.get_rect(topleft=(randint(GameProperties.win_size.x,
-                              GameProperties.win_size.x + GameProperties.win_size.width - self.image.get_width()),GameProperties.win_size.height - 100 * GameProperties.win_scale))
+        self.rect = self.image.get_rect()
+        self.rect.x = randint(GameProperties.win_size.x,
+                              GameProperties.win_size.x + GameProperties.win_size.width - self.rect.width)
+        self.rect.y = GameProperties.win_size.height - 100 * GameProperties.win_scale
         self.timeLastShot = pygame.time.get_ticks()
         self.cooldown = 500
+
+        self.health = 10
+
+        GameProperties.does_player_exists = True
 
     def controls(self, keys):
         speed = PlayerProperties.SPEED * GameProperties.win_scale * GameProperties.deltatime
@@ -73,10 +85,30 @@ class Player(pygame.sprite.Sprite):
     def tirer(self):
         Balle(self.rect)
 
+    def apply_damage(self, damage):
+        self.health -= damage
+
     def update(self):
+        super().update()
+
         keys = pygame.key.get_pressed()
         self.controls(keys)
 
         if keys[pygame.K_SPACE] and pygame.time.get_ticks() > self.timeLastShot + self.cooldown:
             self.timeLastShot = pygame.time.get_ticks()
             self.tirer()
+
+        collided_invaders = pygame.sprite.spritecollide(self, Groups.InvaderGroup, False)
+
+        if len(collided_invaders) != 0:
+            self.kill()  # TODO: Faire une EXPLOSION
+            GameProperties.game_overed = True
+
+        if self.health <= 0:
+            self.kill()  # TODO: Faire une EXPLOSION
+            GameProperties.game_overed = True
+
+    def kill(self):
+        GameProperties.does_player_exists = False
+        super().kill()
+
