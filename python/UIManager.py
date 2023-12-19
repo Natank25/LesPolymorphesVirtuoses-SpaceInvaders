@@ -43,7 +43,8 @@ class Text(pygame.sprite.Sprite):
 class Button(pygame.sprite.Sprite):
     def __init__(self, pos: pygame.Vector2, image, function):
         super().__init__(Groups.UIGroup, Groups.ButtonGroup)
-        self.image = pygame.transform.scale(image, (int(image.get_width() * GameProperties.win_scale), int(image.get_height() * GameProperties.win_scale)))
+        self.image = pygame.transform.scale(image, (
+            int(image.get_width() * GameProperties.win_scale), int(image.get_height() * GameProperties.win_scale)))
         self.rect = self.image.get_rect(center=pos)
         self.function = function
         super().__init__(Groups.UIGroup, Groups.ButtonGroup)
@@ -62,10 +63,11 @@ class Button(pygame.sprite.Sprite):
 class GemText(pygame.sprite.Sprite):
     def __init__(self):
         self.text = "Gems : " + str(GameProperties.gems)
-        self.font = pygame.font.SysFont("arialblack", 20)
+        self.font = Resources.UI.Fonts.arialblack_20
         self.image = self.font.render(self.text, True, (255, 255, 255)).convert_alpha()
         self.pos = (
-        GameProperties.win_size.x + GameProperties.win_size.width - self.image.get_width() - GameProperties.win_size.width * 0.005, GameProperties.win_size.y + GameProperties.win_size.height * 0.005)
+            GameProperties.win_size.x + GameProperties.win_size.width - self.image.get_width() - GameProperties.win_size.width * 0.005,
+            GameProperties.win_size.y + GameProperties.win_size.height * 0.005)
         self.rect = self.image.get_rect(topleft=self.pos)
         super().__init__(Groups.UIGroup)
 
@@ -73,7 +75,8 @@ class GemText(pygame.sprite.Sprite):
         self.text = "Gems : " + str(GameProperties.gems)
         self.image = self.font.render(self.text, True, (255, 255, 255)).convert_alpha()
         self.pos = (
-        GameProperties.win_size.x + GameProperties.win_size.width - self.image.get_width() - GameProperties.win_size.width * 0.005, GameProperties.win_size.y + GameProperties.win_size.height * 0.005)
+            GameProperties.win_size.x + GameProperties.win_size.width - self.image.get_width() - GameProperties.win_size.width * 0.005,
+            GameProperties.win_size.y + GameProperties.win_size.height * 0.005)
         self.rect = self.image.get_rect(topleft=self.pos)
 
 
@@ -81,9 +84,11 @@ class StartingScreen:
 
     @staticmethod
     def show_starting_screen():
-        content_list.append(Text("Appuyez pour jouer", (255, 255, 255), pygame.font.SysFont("arialblack", 35, bold=True),
-                                 update_function=lambda self: self.image.set_alpha(int((math.sin(pygame.time.get_ticks() / 1000 * 1.5) + 1) * 123)),
-                                 center=(GameProperties.win_size.x + GameProperties.win_size.width * 0.5, GameProperties.win_size.y + GameProperties.win_size.height * 0.9)))
+        content_list.append(Text("Appuyez pour jouer", (255, 255, 255), Resources.UI.Fonts.click_to_play,
+                                 update_function=lambda self: self.image.set_alpha(
+                                     int((math.sin(pygame.time.get_ticks() / 1000 * 1.5) + 1) * 123)), center=(
+                GameProperties.win_size.x + GameProperties.win_size.width * 0.5,
+                GameProperties.win_size.y + GameProperties.win_size.height * 0.9)))
 
         GameProperties.set_background(Resources.UI.Images.background_menu_img)
         GameProperties.screen.blit(GameProperties.background, GameProperties.win_size.topleft)
@@ -100,15 +105,20 @@ class Menu:
 
     @staticmethod
     def show_menu():
+        hide_all()
         GameProperties.set_background(Resources.UI.Images.background_img)
 
-        Menu.create_show_game_button(GameProperties.win_size.x + GameProperties.win_size.width / 2, GameProperties.win_size.y + GameProperties.win_size.height * 0.20)
+        Menu.create_show_game_button(GameProperties.win_size.x + GameProperties.win_size.width / 2,
+                                     GameProperties.win_size.y + GameProperties.win_size.height * 0.20)
 
-        Menu.create_show_shop_button(GameProperties.win_size.x + GameProperties.win_size.width / 2, GameProperties.win_size.y + GameProperties.win_size.height * 0.40)
+        Menu.create_show_shop_button(GameProperties.win_size.x + GameProperties.win_size.width / 2,
+                                     GameProperties.win_size.y + GameProperties.win_size.height * 0.40)
 
-        Menu.create_show_settings_button(GameProperties.win_size.x + GameProperties.win_size.width / 2, GameProperties.win_size.y + GameProperties.win_size.height * 0.60)
+        Menu.create_show_settings_button(GameProperties.win_size.x + GameProperties.win_size.width / 2,
+                                         GameProperties.win_size.y + GameProperties.win_size.height * 0.60)
 
-        Menu.create_leave_game_button(GameProperties.win_size.x + GameProperties.win_size.width / 2, GameProperties.win_size.y + GameProperties.win_size.height * 0.80)
+        Menu.create_leave_game_button(GameProperties.win_size.x + GameProperties.win_size.width / 2,
+                                      GameProperties.win_size.y + GameProperties.win_size.height * 0.80)
 
     @staticmethod
     def hide_menu():
@@ -142,8 +152,13 @@ class Pause:
         for content in content_list:
             if type(content) is not Player.Player:
                 content.kill()
+        hide_all()
         GameProperties.set_background(Resources.UI.Images.background_menu_img)
-        Pause.create_resume_game_button(GameProperties.win_size.x + GameProperties.win_size.width * 0.5, GameProperties.win_size.y + GameProperties.win_size.height * 0.45)
+        Pause.create_resume_game_button(GameProperties.win_size.x + GameProperties.win_size.width * 0.5,
+                                        GameProperties.win_size.y + GameProperties.win_size.height * 0.45)
+        Pause.create_back_menu_button(GameProperties.win_size.x + GameProperties.win_size.width * 0.5,
+                                        GameProperties.win_size.y + GameProperties.win_size.height * 0.8)
+
 
     @staticmethod
     def resume_game():
@@ -151,19 +166,27 @@ class Pause:
             Groups.UIGroup.add(content)
         GameProperties.set_background(Resources.UI.Images.background_img)
         GameProperties.game_started = True
-        content_list.append(Text("Coins : " + str(GameProperties.coins), (255, 255, 255), pygame.font.SysFont("arialblack", 20),
-                                 update_function=lambda self: setattr(self, "text", "Coins : " + str(GameProperties.coins)), update_text=True,
-                                 topleft="(GameProperties.win_size.x + GameProperties.win_size.width - Text.image.get_width - GameProperties.win_size.width * 0.005, GameProperties.win_size.y + GameProperties.win_size.height * 0.005)"))
+        content_list.append(
+            Text("Coins : " + str(GameProperties.coins), (255, 255, 255), Resources.UI.Fonts.arialblack_20,
+                 update_function=lambda self: setattr(self, "text", "Coins : " + str(GameProperties.coins)),
+                 update_text=True,
+                 topleft="(GameProperties.win_size.x + GameProperties.win_size.width - Text.image.get_width - GameProperties.win_size.width * 0.005, GameProperties.win_size.y + GameProperties.win_size.height * 0.005)"))
 
     @staticmethod
     def create_resume_game_button(x, y):
-        content_list.append(Button(pygame.Vector2(x, y), Resources.UI.Images.play_game_img, lambda: Pause.unpause_game()))
+        content_list.append(
+            Button(pygame.Vector2(x, y), Resources.UI.Images.play_game_img, lambda: Pause.unpause_game()))
 
     @staticmethod
     def unpause_game():
         GameProperties.paused = not GameProperties.paused
         resume_game()
 
+
+    @staticmethod
+    def create_back_menu_button(x, y):
+        content_list.append(
+            Button(pygame.Vector2(x, y), Resources.UI.Images.play_game_img, lambda: Menu.show_menu()))
 
 class Game:
 
@@ -174,9 +197,11 @@ class Game:
         GameProperties.set_background(Resources.UI.Images.background_img)
         GameProperties.screen.blit(GameProperties.background, GameProperties.win_size.topleft)
         GameProperties.game_started = True
-        content_list.append(Text("Coins : " + str(GameProperties.coins), (255, 255, 255), pygame.font.SysFont("arialblack", 20),
-                                 update_function=lambda self: setattr(self, "text", "Coins : " + str(GameProperties.coins)), update_text=True,
-                                 topleft="(GameProperties.win_size.x + GameProperties.win_size.width - Text.image.get_width - GameProperties.win_size.width * 0.005, GameProperties.win_size.y + GameProperties.win_size.height * 0.005)"))
+        content_list.append(
+            Text("Coins : " + str(GameProperties.coins), (255, 255, 255), Resources.UI.Fonts.arialblack_20,
+                 update_function=lambda self: setattr(self, "text", "Coins : " + str(GameProperties.coins)),
+                 update_text=True,
+                 topleft="(GameProperties.win_size.x + GameProperties.win_size.width - Text.image.get_width - GameProperties.win_size.width * 0.005, GameProperties.win_size.y + GameProperties.win_size.height * 0.005)"))
 
     @staticmethod
     def hide_game():
@@ -192,16 +217,25 @@ class Shop:
         GameProperties.set_background(Resources.UI.Images.background_img)
         GameProperties.screen.blit(GameProperties.background, GameProperties.win_size.topleft)
         content_list.append(
-            Text("Gems : " + str(GameProperties.gems), (255, 255, 255), pygame.font.SysFont("arialblack", 20), update_function=lambda self: setattr(self, "text", "Gems : " + str(GameProperties.gems)),
+            Text("Gems : " + str(GameProperties.gems), (255, 255, 255), Resources.UI.Fonts.arialblack_20,
+                 update_function=lambda self: setattr(self, "text", "Gems : " + str(GameProperties.gems)),
                  update_text=True,
                  topleft="(GameProperties.win_size.x + GameProperties.win_size.width - Text.image.get_width - GameProperties.win_size.width * 0.005, GameProperties.win_size.y + GameProperties.win_size.height * 0.005)"))
 
         content_list.append(GemText())
-        Shop.upgrade_dmg_button(GameProperties.win_size.width * 0.5, GameProperties.win_size.y + GameProperties.win_size.height * 0.45)
+        Shop.upgrade_dmg_button(GameProperties.win_size.width * 0.2,
+                                GameProperties.win_size.y + GameProperties.win_size.height * 0.2)
 
     @staticmethod
     def upgrade_dmg_button(x, y):
-        content_list.append(Button(pygame.Vector2(x, y), Resources.UI.Images.play_game_img, lambda: GameProperties.damage_upgrade()))
+        content_list.append(
+            Button(pygame.Vector2(x, y), Resources.UI.Images.play_game_img, lambda: GameProperties.damage_upgrade()))
+        content_list.append(Text("Coute : " + str(GameProperties.get_damage_upgrade_cost()), (255, 255, 255),
+                                 Resources.UI.Fonts.arialblack_20, update_function=lambda self: setattr(self, "text",
+                                                                                                        "Coute : " + str(
+                                                                                                            GameProperties.get_damage_upgrade_cost())),
+                                 update_text=True,
+                                 center="(" + str(x) + "," + str(y) + ")"))
 
 
 class Settings:
@@ -216,7 +250,8 @@ class GameOver:
     def show_game_over():
         GameProperties.set_background(Resources.UI.Images.background_img)
         GameProperties.screen.blit(GameProperties.background, GameProperties.win_size.topleft)
-        Menu.create_show_menu_button(GameProperties.win_size.x + GameProperties.win_size.width / 2, GameProperties.win_size.y + GameProperties.win_size.height * 0.45)
+        Menu.create_show_menu_button(GameProperties.win_size.x + GameProperties.win_size.width / 2,
+                                     GameProperties.win_size.y + GameProperties.win_size.height * 0.45)
 
 
 content_list = []

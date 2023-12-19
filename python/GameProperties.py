@@ -1,7 +1,9 @@
 import pygame
-
+print(100,pygame.time.get_ticks())
 from python import Resources
+print(101,pygame.time.get_ticks())
 from python.DataManager import DataManager
+print(102,pygame.time.get_ticks())
 
 pygame.init()
 
@@ -27,17 +29,15 @@ current_wave = DataManager.get_current_waves()
 
 paused = False
 
-coins = DataManager.get_coins_player()
+coins: int = DataManager.get_coins_player()
 
-gems = DataManager.get_gems_player()
+gems: int = DataManager.get_gems_player()
 
 does_player_exists = False
 
 game_overed = False
 
 coin_shop = DataManager.get_coin_shop()
-
-
 
 gems_shop = DataManager.get_gems_shop()
 
@@ -52,12 +52,15 @@ def set_background(value):
     group_background = pygame.image.load("bg.png")
     background = value
 
-    game_started = False
-
-    current_wave = 0
-
 
 def damage_upgrade():
     global coins
-    coin_shop["damage_upgrade"] += 1
-    coins -= coin_shop["damage_upgrade"]**1.5
+    if coins > get_damage_upgrade_cost():
+        coin_shop["damage_upgrade"] += 1
+        coins -= get_damage_upgrade_cost()
+    else:
+        print("t'as pas les thunes salope")
+
+
+def get_damage_upgrade_cost():
+    return int(1+coin_shop["damage_upgrade"]**1.5)

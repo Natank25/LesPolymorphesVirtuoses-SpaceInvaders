@@ -3,6 +3,7 @@ import pygame.time
 from Enemies import EnemyType
 from python import GameProperties
 from python import Groups
+from python import Resources
 
 next_spawns = []
 
@@ -15,7 +16,7 @@ def send_waves_endless(difficulty: int):
 
 
 def send_waves_levels(num_wave):
-    print(num_wave  )
+    print("New wave :", num_wave)
     match num_wave:
         case 1:
             for i in range(3 + GameProperties.difficulty):
@@ -38,6 +39,7 @@ def send_waves_levels(num_wave):
                 spawnEnemy(EnemyType.SPEEDINVADER1, 3000 * i)
         case 5:
             spawnEnemy(EnemyType.BOSS1)
+            Resources.Ennemies.Sons.BossSound.play()
         case 6:
             for i in range(2 + GameProperties.difficulty):
                 spawnEnemy(EnemyType.COMMONINVADER1, 1500 * i)
@@ -62,6 +64,7 @@ def send_waves_levels(num_wave):
                 spawnEnemy(EnemyType.TANKINVADER1, 4500 * i)
         case 10:
             spawnEnemy(EnemyType.BOSS2)
+            Resources.Ennemies.Sons.BossSound.play()
         case 11:
             for i in range(2 + GameProperties.difficulty):
                 spawnEnemy(EnemyType.SPEEDINVADER2, 1500 * i)
@@ -80,6 +83,7 @@ def send_waves_levels(num_wave):
             pass
         case 15:
             spawnEnemy(EnemyType.BOSS3)
+            Resources.Ennemies.Sons.BossSound.play()
         case 16:
             pass
         case 17:
@@ -90,6 +94,7 @@ def send_waves_levels(num_wave):
             pass
         case 20:
             spawnEnemy(EnemyType.BOSS4)
+            Resources.Ennemies.Sons.BossSound.play()
         case 21:
             pass
         case 22:
@@ -100,6 +105,7 @@ def send_waves_levels(num_wave):
             pass
         case 25:
             spawnEnemy(EnemyType.BOSS5)
+            Resources.Ennemies.Sons.BossSound.play()
         case 26:
             pass
         case 27:
@@ -110,6 +116,7 @@ def send_waves_levels(num_wave):
             pass
         case 30:
             spawnEnemy(EnemyType.BOSS6)
+            Resources.Ennemies.Sons.BossSound.play()
         case 31:
             pass
         case 32:
@@ -261,7 +268,7 @@ def update():
     global on_going_wave
     on_going_wave = len(next_spawns) != 0
 
-    for i_dict in range(len(next_spawns)-1,-1,-1):
+    for i_dict in range(len(next_spawns) - 1, -1, -1):
         for enemy_type, delay in next_spawns[i_dict].items():
             if GameProperties.paused:
                 next_spawns[i_dict][enemy_type] += int(GameProperties.deltatime)

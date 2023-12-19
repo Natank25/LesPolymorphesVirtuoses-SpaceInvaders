@@ -1,6 +1,8 @@
 import pygame
 
+print(27, pygame.time.get_ticks())
 from python import GameProperties
+print(28, pygame.time.get_ticks())
 
 pygame.init()
 
