@@ -20,11 +20,9 @@ class AllSprites(pygame.sprite.RenderClear):
         for sprite in self.sprites():
 
             if hasattr(sprite, 'image_path'):
-                sprite.image = pygame.transform.scale(pygame.image.load(sprite.image_path), (
-                    int(scale_x * sprite.image.get_width()), int(scale_y * sprite.image.get_height())))
+                sprite.image = pygame.transform.scale_by(pygame.image.load(sprite.image_path), scale_x)
             else:
-                sprite.image = pygame.transform.scale(sprite.image, (
-                    int(scale_x * sprite.image.get_width()), int(scale_y * sprite.image.get_height())))
+                sprite.image = pygame.transform.scale_by(sprite.image, scale_x)
 
             new_x = int((sprite.rect.x - prev_window.x) * scale_x + current_window.x)
             new_y = int((sprite.rect.y - prev_window.y) * scale_y + current_window.y)

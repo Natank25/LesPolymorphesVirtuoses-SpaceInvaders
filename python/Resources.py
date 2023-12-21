@@ -7,26 +7,33 @@ pygame.mixer.init()
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-# TODO: add fonts here
 print("UI", pygame.time.get_ticks())
+
 
 class UI:
     print("    Images", pygame.time.get_ticks())
 
     class Images:
-        play_game_img = pygame.image.load("../img/UI/buttons/play_button.png")
+        # Font : FUGAZ ONE; 72, all caps
+        play_game_button_img = pygame.image.load("../img/UI/buttons/play_button.png")
+        leave_game_button_img = pygame.image.load("../img/UI/buttons/leave_game_button.png")
+        resume_button_img = pygame.image.load("../img/UI/buttons/resume_button.png")
+
+        shop_button_img = pygame.image.load("../img/UI/buttons/shop_button.png")
+
+        settings_button_img = pygame.image.load("../img/UI/buttons/settings_button.png")
+        quit_button_img = pygame.image.load("../img/UI/buttons/quit_button.png")
+
+        arrow_img = pygame.image.load("../img/UI/buttons/arrow.png")
+
         background_img = pygame.image.load("../img/background.png")
         background_menu_img = pygame.image.load("../img/background_menu.png")
-        # settings_button_img
-        # resume_button_img
-        # shop_button_img
-        quit_button_img = pygame.image.load("../img/UI/buttons/quit_button.png")
 
     print("    Fonts", pygame.time.get_ticks())
 
     class Fonts:
         arialblack_20 = pygame.font.SysFont("arialblack", 20)
-        click_to_play = pygame.font.SysFont("arialblack", 35, bold=True)
+        arialblack_35 = pygame.font.SysFont("arialblack", 35, bold=True)
 
     print("    Sons", pygame.time.get_ticks())
 
@@ -74,5 +81,6 @@ class Ennemies:
     print("    Sons", pygame.time.get_ticks())
 
     class Sons:
-        BossSound = pygame.mixer.Sound("../sounds/boss.ogg")
-        DeathSound = pygame.mixer.Sound("../sounds/roblox-death-sound_1.mp3")
+        BossSound = pygame.mixer.Sound("../sounds/BossSound.ogg")
+        PlayerDeathSound = pygame.mixer.Sound("../sounds/PlayerDeathSound.ogg")
+        InvaderDeathSound = pygame.mixer.Sound("../sounds/InvaderDeathSound.ogg")

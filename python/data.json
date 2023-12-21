@@ -16,10 +16,11 @@
   "shops": {
     "coins": {
       "damage_upgrade": 0,
+      "atk_speed_upgrade": 0,
       "health_upgrade": 0
     },
     "gems": {
-      "unlocked_upgrade": []
+      "gems_10": 0
     }
   }
 }

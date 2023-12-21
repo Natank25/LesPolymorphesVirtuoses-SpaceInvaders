@@ -1,7 +1,7 @@
 import pygame.sprite
 
-from python import Groups
 from python import GameProperties
+from python import Groups
 
 
 class Sprite(pygame.sprite.Sprite):

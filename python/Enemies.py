@@ -4,8 +4,8 @@ from random import randint
 
 import pygame
 
-from python import Groups, Utils
 from python import GameProperties
+from python import Groups, Utils, Resources
 from python.Resources import Ennemies
 
 pygame.init()
@@ -14,7 +14,7 @@ pygame.init()
 class Balle(Utils.Sprite):
     def __init__(self, pos, speed=3, damage=1):
         self.image = Ennemies.Images.Balle
-        self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * GameProperties.win_scale), int(self.image.get_height() * GameProperties.win_scale)))
+        self.image = pygame.transform.scale_by(self.image, GameProperties.win_scale)
         self.image = pygame.transform.rotate(self.image, 180)
         self.rect = self.image.get_rect(center=pos)
         self.speed = speed
@@ -35,19 +35,19 @@ class Balle(Utils.Sprite):
 
 class Invader(Utils.Sprite):
     def __init__(self, speedx, speedy, health, image, atk_speed: float = 0, shooter=False, can_esquive=False):
-        self.image = image
+        self.image = pygame.transform.scale_by(image, GameProperties.win_scale)
         self.speedx = random.choice([speedx * GameProperties.difficulty, -speedx * GameProperties.difficulty])
         self.speedy = speedy * GameProperties.difficulty / 3
         self.health = health * GameProperties.difficulty
         self.coin_drop = health * GameProperties.difficulty
-        self.gem_drop = random.randint(0, 100)
+        self.gem_drop = 1
         self.shooter = shooter
         self.atk_speed = atk_speed * 1000
         self.lastEsquive = pygame.time.get_ticks()
         self.nextEsquive = pygame.time.get_ticks() + randint(500, 5000)
         self.canEsquive = can_esquive
         self.rect = self.image.get_rect()
-        self.rect.topleft = (randint(GameProperties.win_size.x + 10, GameProperties.win_size.width - self.rect.width - 10), GameProperties.win_size.y + 10)
+        self.rect.topleft = (randint(GameProperties.win_size.x + 10, GameProperties.win_size.x + GameProperties.win_size.width - self.rect.width - 10), GameProperties.win_size.y + 10)
         for invader in Groups.InvaderGroup.sprites():
             while self.rect.colliderect(invader.rect) and not self.rect.colliderect(GameProperties.win_size):
                 self.rect.x += random.randint(-self.image.get_width() - 10, self.image.get_width() + 10)
@@ -86,10 +86,11 @@ class Invader(Utils.Sprite):
         self.tirer()
 
         if self.health < 0:
+            Resources.Ennemies.Sons.InvaderDeathSound.play()
             self.kill()
             GameProperties.coins += self.coin_drop
             if self.gem_drop == random.randint(0, 100):
-                GameProperties.gems += 1+GameProperties.difficulty
+                GameProperties.gems += 1 + GameProperties.difficulty
 
         if GameProperties.does_player_exists and self.rect.center[1] > GameProperties.win_size.height + GameProperties.win_size.y:
             self.kill()
@@ -98,43 +99,44 @@ class Invader(Utils.Sprite):
 
 class CommonInvader1(Invader):
     def __init__(self):
-        super().__init__(EnemyAttributes.CommonInvaders1DefaultSpeedx.value, EnemyAttributes.CommonInvaders1DefaultSpeedy.value, EnemyAttributes.CommonInvaders1DefaultHealth.value, Ennemies.Images.CommonInvader1)
+        super().__init__(EnemyAttributes.CommonInvaders1DefaultSpeedx.value, EnemyAttributes.CommonInvaders1DefaultSpeedy.value, EnemyAttributes.CommonInvaders1DefaultHealth.value,
+                         Ennemies.Images.CommonInvader1)
 
 
 class CommonInvader2(Invader):
     def __init__(self):
-        super().__init__(EnemyAttributes.CommonInvaders2DefaultSpeedx.value + (GameProperties.difficulty / 10), EnemyAttributes.CommonInvaders2DefaultSpeedy.value + (GameProperties.difficulty / 20),
-                         EnemyAttributes.CommonInvaders2DefaultHealth.value * (1 + GameProperties.difficulty), Ennemies.Images.CommonInvader2)
+        super().__init__(EnemyAttributes.CommonInvaders2DefaultSpeedx.value, EnemyAttributes.CommonInvaders2DefaultSpeedy.value, EnemyAttributes.CommonInvaders2DefaultHealth.value,
+                         Ennemies.Images.CommonInvader2)
 
 
 class CommonInvader3(Invader):
     def __init__(self):
-        super().__init__(EnemyAttributes.CommonInvaders3DefaultSpeedx.value + (GameProperties.difficulty / 10), EnemyAttributes.CommonInvaders3DefaultSpeedy.value + (GameProperties.difficulty / 20),
-                         EnemyAttributes.CommonInvaders3DefaultHealth.value * (1 + GameProperties.difficulty), Ennemies.Images.CommonInvader3)
+        super().__init__(EnemyAttributes.CommonInvaders3DefaultSpeedx.value, EnemyAttributes.CommonInvaders3DefaultSpeedy.value, EnemyAttributes.CommonInvaders3DefaultHealth.value,
+                         Ennemies.Images.CommonInvader3)
 
 
 class SpeedInvader1(Invader):
     def __init__(self):
-        super().__init__(EnemyAttributes.SpeedInvader1DefaultSpeedx.value, EnemyAttributes.SpeedInvader1DefaultSpeedy.value,
-                         EnemyAttributes.SpeedInvader2DefaultHealth.value, Ennemies.Images.SpeedInvader1)
+        super().__init__(EnemyAttributes.SpeedInvader1DefaultSpeedx.value, EnemyAttributes.SpeedInvader1DefaultSpeedy.value, EnemyAttributes.SpeedInvader2DefaultHealth.value,
+                         Ennemies.Images.SpeedInvader1)
 
 
 class SpeedInvader2(Invader):
     def __init__(self):
-        super().__init__(EnemyAttributes.SpeedInvader2DefaultSpeedx.value + (GameProperties.difficulty / 10), EnemyAttributes.SpeedInvader2DefaultSpeedy.value + (GameProperties.difficulty / 20),
-                         EnemyAttributes.SpeedInvader2DefaultHealth.value * (1 + GameProperties.difficulty), Ennemies.Images.SpeedInvader2)
+        super().__init__(EnemyAttributes.SpeedInvader2DefaultSpeedx.value, EnemyAttributes.SpeedInvader2DefaultSpeedy.value, EnemyAttributes.SpeedInvader2DefaultHealth.value,
+                         Ennemies.Images.SpeedInvader2)
 
 
 class SpeedInvader3(Invader):
     def __init__(self):
-        super().__init__(EnemyAttributes.SpeedInvader2DefaultSpeedx.value + (GameProperties.difficulty / 10), EnemyAttributes.SpeedInvader2DefaultSpeedy.value + (GameProperties.difficulty / 20),
-                         EnemyAttributes.SpeedInvader2DefaultHealth.value * (1 + GameProperties.difficulty), Ennemies.Images.SpeedInvader3)
+        super().__init__(EnemyAttributes.SpeedInvader3DefaultSpeedx.value + (GameProperties.difficulty / 10), EnemyAttributes.SpeedInvader3DefaultSpeedy.value + (GameProperties.difficulty / 20),
+                         EnemyAttributes.SpeedInvader3DefaultHealth.value * (1 + GameProperties.difficulty), Ennemies.Images.SpeedInvader3)
 
 
 class TankInvader1(Invader):
     def __init__(self):
-        super().__init__(EnemyAttributes.TankInvader1DefaultSpeedx.value + (GameProperties.difficulty / 10), EnemyAttributes.TankInvader1DefaultSpeedy.value + (GameProperties.difficulty / 20),
-                         EnemyAttributes.TankInvader1DefaultHealth.value * (1 + GameProperties.difficulty), Ennemies.Images.TankInvader1)
+        super().__init__(EnemyAttributes.TankInvader1DefaultSpeedx.value, EnemyAttributes.TankInvader1DefaultSpeedy.value, EnemyAttributes.TankInvader1DefaultHealth.value,
+                         Ennemies.Images.TankInvader1)
 
 
 class TankInvader2(Invader):
@@ -151,8 +153,8 @@ class TankInvader3(Invader):
 
 class ShooterInvader1(Invader):
     def __init__(self):
-        super().__init__(EnemyAttributes.ShooterInvader1DefaultSpeedx.value, EnemyAttributes.ShooterInvader1DefaultSpeedy.value,
-                         EnemyAttributes.ShooterInvader1DefaultHealth.value, Ennemies.Images.SpeedInvader1, shooter=True, atk_speed=2.5)
+        super().__init__(EnemyAttributes.ShooterInvader1DefaultSpeedx.value, EnemyAttributes.ShooterInvader1DefaultSpeedy.value, EnemyAttributes.ShooterInvader1DefaultHealth.value,
+                         Ennemies.Images.SpeedInvader1, shooter=True, atk_speed=2.5)
 
 
 class ShooterInvader2(Invader):
@@ -168,16 +170,18 @@ class ShooterInvader3(Invader):
 
 
 class Boss(Utils.Sprite):
-    def __init__(self, hauteur, speedx, speedy, health, image, atk_speed=0):
+    def __init__(self, hauteur, speedx, speedy, health, image, atk_speed=0, sound=Resources.Ennemies.Sons.BossSound):
         self.next_shot = pygame.time.get_ticks() + atk_speed + GameProperties.difficulty
         self.speedx = speedx + (GameProperties.difficulty / 10)
         self.speedy = speedy + (GameProperties.difficulty / 20)
         self.health = health * (1 + GameProperties.difficulty)
         self.image = image
-        self.rect = self.image.get_rect(topleft=(randint(GameProperties.win_size.x, GameProperties.win_size.x + GameProperties.win_size.width - self.image.get_width()),hauteur))
-
+        self.rect = self.image.get_rect(topleft=(randint(GameProperties.win_size.x, GameProperties.win_size.x + GameProperties.win_size.width - self.image.get_width()), hauteur))
+        self.sound = sound
         self.coin_drop = health * GameProperties.difficulty
         self.gem_drop = 1
+
+        self.sound.play()
         super().__init__(Groups.InvaderGroup)
 
     def update(self):
@@ -207,23 +211,23 @@ class Boss(Utils.Sprite):
     def apply_damage(self, damage):
         self.health -= damage
 
+
 # region Bosses
+
 
 class Boss1(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur,
-                         EnemyAttributes.Boss1DefaultSpeedx.value,
-                         EnemyAttributes.Boss1DefaultSpeedy.value,
-                         EnemyAttributes.Boss1DefaultHealth.value,
-                         Ennemies.Images.CommonInvader1,
+        super().__init__(hauteur, EnemyAttributes.Boss1DefaultSpeedx.value, EnemyAttributes.Boss1DefaultSpeedy.value, EnemyAttributes.Boss1DefaultHealth.value, Ennemies.Images.CommonInvader1,
                          EnemyAttributes.Boss1DefaultSpeedATK.value)
+
+    def main_attack(self):
+        pass
 
 
 class Boss2(Boss):
     def __init__(self, hauteur=25):
-        super().__init__(hauteur, EnemyAttributes.Boss2DefaultSpeedx.value + (GameProperties.difficulty / 10), EnemyAttributes.Boss2DefaultSpeedy.value + (GameProperties.difficulty / 20),
-                         EnemyAttributes.Boss2DefaultHealth.value, EnemyAttributes.Boss2DefaultSpeedATK.value ,
-                         Ennemies.Images.CommonInvader1)
+        super().__init__(hauteur, EnemyAttributes.Boss2DefaultSpeedx.value, EnemyAttributes.Boss2DefaultSpeedy.value, EnemyAttributes.Boss2DefaultHealth.value, Ennemies.Images.CommonInvader1,
+                         EnemyAttributes.Boss2DefaultSpeedATK.value)
 
 
 class Boss3(Boss):
@@ -356,33 +360,33 @@ class EnemyAttributes(Enum):
     # common
     CommonInvaders1DefaultHealth = 1
     CommonInvaders1DefaultSpeedx = 0.1
-    CommonInvaders1DefaultSpeedy = 0.20
+    CommonInvaders1DefaultSpeedy = 0.2
 
     CommonInvaders2DefaultHealth = 5
-    CommonInvaders2DefaultSpeedx = 0.3
-    CommonInvaders2DefaultSpeedy = 0.1
+    CommonInvaders2DefaultSpeedx = 0.1
+    CommonInvaders2DefaultSpeedy = 0.2
 
     CommonInvaders3DefaultHealth = 25
-    CommonInvaders3DefaultSpeedx = 0.3
-    CommonInvaders3DefaultSpeedy = 0.1
+    CommonInvaders3DefaultSpeedx = 0.1
+    CommonInvaders3DefaultSpeedy = 0.2
 
     # speed
     SpeedInvader1DefaultHealth = 1
     SpeedInvader1DefaultSpeedx = 0.15
     SpeedInvader1DefaultSpeedy = 0.45
 
-    SpeedInvader2DefaultHealth = 2
-    SpeedInvader2DefaultSpeedx = 0.20
-    SpeedInvader2DefaultSpeedy = 0.50
+    SpeedInvader2DefaultHealth = 3
+    SpeedInvader2DefaultSpeedx = 0.2
+    SpeedInvader2DefaultSpeedy = 0.5
 
     SpeedInvader3DefaultHealth = 15
-    SpeedInvader3DefaultSpeedx = 0.3
-    SpeedInvader3DefaultSpeedy = 0.2
+    SpeedInvader3DefaultSpeedx = 0.25
+    SpeedInvader3DefaultSpeedy = 0.55
 
     # tank
-    TankInvader1DefaultHealth = 20
-    TankInvader1DefaultSpeedx = 0.2
-    TankInvader1DefaultSpeedy = 0.075
+    TankInvader1DefaultHealth = 25
+    TankInvader1DefaultSpeedx = 0.05
+    TankInvader1DefaultSpeedy = 0.1
 
     TankInvader2DefaultHealth = 100
     TankInvader2DefaultSpeedx = 0.2
@@ -414,9 +418,9 @@ class EnemyAttributes(Enum):
     Boss1DefaultSpeedy = 0.01
     Boss1DefaultSpeedATK = 1
 
-    Boss2DefaultHealth = 150
-    Boss2DefaultSpeedx = 2
-    Boss2DefaultSpeedy = 0.2
+    Boss2DefaultHealth = 250
+    Boss2DefaultSpeedx = 0.01
+    Boss2DefaultSpeedy = 0.01
     Boss2DefaultSpeedATK = 1
 
     Boss3DefaultHealth = 150

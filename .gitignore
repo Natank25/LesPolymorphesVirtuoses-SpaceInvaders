@@ -1,0 +1,6 @@
+
+.idea/vcs.xml
+*.pyc
+/prof/archive/documents pour eleves/__pycache__/
+/python/__pycache__/
+/.idea/

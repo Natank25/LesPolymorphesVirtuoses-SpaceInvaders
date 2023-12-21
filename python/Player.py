@@ -9,8 +9,12 @@ from python import Resources, Utils
 
 class PlayerProperties:
     SPEED = 0.3
-    DAMAGE = int((GameProperties.coin_shop["damage_upgrade"]+1) ** (1.4 - (GameProperties.difficulty / 100)))
-    atk_speed = 1
+    DAMAGE = 1
+    ATK_SPEED = 1
+    MAX_HEALTH = 3
+
+
+GameProperties.Upgrades.update_upgrades()
 
 
 class Balle(Utils.Sprite):
@@ -18,12 +22,11 @@ class Balle(Utils.Sprite):
         super().__init__(Groups.BulletGroup)
 
         self.image = Resources.Player.Images.Balle
-        self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * GameProperties.win_scale),
-                                                         int(self.image.get_height() * GameProperties.win_scale)))
+        self.image = pygame.transform.scale_by(self.image, GameProperties.win_scale)
         self.rect = self.image.get_rect()
         self.rect.center = ship.center
         self.speed = speed
-        self.damage = 1
+        self.damage = PlayerProperties.DAMAGE
 
     def update(self):
         super().update()
@@ -45,16 +48,15 @@ class Player(Utils.Sprite):
     def __init__(self):
         super().__init__(Groups.PlayerGroup)
         self.image = Resources.Player.Images.Vaisseau_Base
-        self.image = pygame.transform.scale(self.image, (int(self.image.get_width() * GameProperties.win_scale),
-                                                         int(self.image.get_height() * GameProperties.win_scale)))
+        self.image = pygame.transform.scale_by(self.image, GameProperties.win_scale)
         self.rect = self.image.get_rect()
         self.rect.x = randint(GameProperties.win_size.x,
                               GameProperties.win_size.x + GameProperties.win_size.width - self.rect.width)
         self.rect.y = GameProperties.win_size.height - 100 * GameProperties.win_scale
         self.timeLastShot = pygame.time.get_ticks()
-        self.cooldown = 500
+        self.cooldown = 500 - PlayerProperties.ATK_SPEED
 
-        self.health = 10
+        self.health = PlayerProperties.MAX_HEALTH
 
         GameProperties.does_player_exists = True
 
@@ -111,4 +113,3 @@ class Player(Utils.Sprite):
     def kill(self):
         GameProperties.does_player_exists = False
         super().kill()
-
