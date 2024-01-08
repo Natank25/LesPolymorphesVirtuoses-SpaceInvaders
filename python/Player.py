@@ -18,14 +18,17 @@ GameProperties.Upgrades.update_upgrades()
 
 
 class Balle(Utils.Sprite):
-    def __init__(self, ship: pygame.rect.Rect, speed=0.3):
+    def __init__(self, ship: pygame.rect.Rect, speed=0.3, sound=Resources.Ennemies.Sons.BulletSound):
         super().__init__(Groups.BulletGroup)
 
         self.image = Resources.Player.Images.Balle
         self.image = pygame.transform.scale_by(self.image, GameProperties.win_scale)
         self.rect = self.image.get_rect()
         self.rect.center = ship.center
+        self.radius = 32
         self.speed = speed
+        self.sound = sound
+        self.sound.play()
         self.damage = PlayerProperties.DAMAGE
 
     def update(self):
@@ -41,9 +44,9 @@ class Balle(Utils.Sprite):
         for invader in collided_sprites:
             invader.apply_damage(self.damage)
             self.kill()
+            break
 
 
-# TODO: add lives/health
 class Player(Utils.Sprite):
     def __init__(self):
         super().__init__(Groups.PlayerGroup)
@@ -103,11 +106,11 @@ class Player(Utils.Sprite):
         collided_invaders = pygame.sprite.spritecollide(self, Groups.InvaderGroup, False)
 
         if len(collided_invaders) != 0:
-            self.kill()  # TODO: Faire une EXPLOSION
+            self.kill()
             GameProperties.game_overed = True
 
         if self.health <= 0:
-            self.kill()  # TODO: Faire une EXPLOSION
+            self.kill()
             GameProperties.game_overed = True
 
     def kill(self):

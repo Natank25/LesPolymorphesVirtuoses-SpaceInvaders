@@ -1,28 +1,37 @@
-import sys
 from math import gcd
 import pygame
+
+pygame.init()
+print("pygame", pygame.time.get_ticks())
+
 from python import Resources
 
-print(1,pygame.time.get_ticks())
-
+print(1, pygame.time.get_ticks())
 from python import Groups
-print(2,pygame.time.get_ticks())
+
+print(2, pygame.time.get_ticks())
 from python import EnemiesManager
-print(3,pygame.time.get_ticks())
+
+print(3, pygame.time.get_ticks())
 from python import GameProperties
-print(4,pygame.time.get_ticks())
-from python.Player import Player
-print(5,pygame.time.get_ticks())
+
+print(4, pygame.time.get_ticks())
 from python import UIManager
-print(6,pygame.time.get_ticks())
+
+print(5, pygame.time.get_ticks())
+
+# username = input("Entrez votre nom d'utilisateur >>> ")
+username = ""
+if username in GameProperties.get_all_usernames():
+    GameProperties.set_username(username)
+else:
+    GameProperties.add_username(username)
 
 wanted_ratio = [8, 5]
 win_size = GameProperties.default_win_size.copy()
 
 
-pygame.init()
-
-GameProperties.screen = pygame.display.set_mode((win_size[0], win_size[1]), pygame.RESIZABLE)
+GameProperties.screen = pygame.display.set_mode((win_size[0], win_size[1]))
 
 background_rect = GameProperties.background.get_rect()
 
@@ -61,6 +70,7 @@ def update_game_win() -> list:
 
     return part_filled_1
 
+
 fullscreen = False
 
 prev_window_size = pygame.display.get_window_size()
@@ -72,27 +82,32 @@ pygame.display.set_caption("Space Invaders")
 
 running = True
 
-# UIManager.show_game()
+if Resources.Game.Sons.BackgroundSound.get_num_channels() == 0:
+    Resources.Game.Sons.BackgroundSound.play()
+
+# UIManager.show_login()
 UIManager.show_starting_screen()
 clock = pygame.time.Clock()
 while running:
 
+    GameProperties.deltatime = clock.tick(60)
     UIManager.update()
     EnemiesManager.update()
-
-    GameProperties.deltatime = clock.tick(60)
 
     Groups.AllSpritesGroup.clear(GameProperties.screen, GameProperties.group_background)
     Groups.UIGroup.clear(GameProperties.screen, GameProperties.group_background)
 
     if not GameProperties.paused:
-        Groups.AllSpritesGroup.draw(GameProperties.screen)
         Groups.AllSpritesGroup.update()
+        Groups.AllSpritesGroup.draw(GameProperties.screen)
+        Groups.PlayerGroup.draw(GameProperties.screen)
 
-    Groups.UIGroup.draw(GameProperties.screen)
     Groups.UIGroup.update()
+    Groups.UIGroup.draw(GameProperties.screen)
 
-    for event in pygame.event.get():
+    GameProperties.events = pygame.event.get()
+
+    for event in GameProperties.events:
         if event.type == pygame.QUIT:
             running = False
 
@@ -110,7 +125,7 @@ while running:
             Groups.UIGroup.moveSprites(GameProperties.win_size, prev_game_window)
 
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_F11:
+            if False and event.key == pygame.K_F11:
                 fullscreen = not fullscreen
 
                 prev_game_window = GameProperties.win_size.copy()
@@ -123,18 +138,19 @@ while running:
                 GameProperties.screen.fill("black")
 
             if event.key == pygame.K_ESCAPE:
-                GameProperties.paused = not GameProperties.paused
-                if GameProperties.paused:
-                    UIManager.show_pause()
-                else:
-                    UIManager.resume_game()
+                if GameProperties.playing:
+                    GameProperties.paused = not GameProperties.paused
+                    if GameProperties.paused:
+                        UIManager.show_pause()
+                    else:
+                        UIManager.resume_game()
 
             elif event.key == pygame.K_m:
                 EnemiesManager.spawn_current_wave()
             elif event.key == pygame.K_p:
                 EnemiesManager.kill_all()
             elif event.key == pygame.K_EXCLAIM:
-                GameProperties.coins += 99999**9
+                GameProperties.coins *= 2.35
             elif event.key == pygame.K_COLON:
                 GameProperties.gems += 100
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -148,6 +164,4 @@ while running:
 
     pygame.display.flip()
 
-
-pygame.quit()
-sys.exit()
+GameProperties.leave_game()

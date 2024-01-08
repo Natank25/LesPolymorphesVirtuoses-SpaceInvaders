@@ -1,26 +1,91 @@
 {
   "players": {
-    "default_player": {
+    "guest": {
+      "password": "none",
       "gems": 0,
-      "coins": 0
-    }
-  },
-  "game_properties": {
-    "waves_game": {
-      "current_wave": 0
+      "coins": 0,
+      "game_properties": {
+        "waves_game": {
+          "current_wave": 0
+        },
+        "difficulty": {
+          "current_difficulty": 1
+        }
+      },
+      "shops": {
+        "coins": {
+          "atk_speed_upgrade": 1,
+          "damage_upgrade": 0,
+          "health_upgrade": 0
+        },
+        "gems": {
+          "gems_10": 1,
+          "gems_25": 0,
+          "gems_50": 0,
+          "gems_100": 0
+        }
+      },
+      "settings": {
+        "coins_type": "big_numbers"
+      }
     },
-    "difficulty": {
-      "current_difficulty": 1
-    }
-  },
-  "shops": {
-    "coins": {
-      "damage_upgrade": 0,
-      "atk_speed_upgrade": 0,
-      "health_upgrade": 0
+    "teest": {
+      "password": "reset",
+      "gems": 0,
+      "coins": 3,
+      "game_properties": {
+        "waves_game": {
+          "current_wave": 1
+        },
+        "difficulty": {
+          "current_difficulty": 1
+        }
+      },
+      "shops": {
+        "coins": {
+          "atk_speed_upgrade": 0,
+          "damage_upgrade": 0,
+          "health_upgrade": 0
+        },
+        "gems": {
+          "gems_10": 1,
+          "gems_25": 0,
+          "gems_50": 0,
+          "gems_100": 0
+        }
+      },
+      "settings": {
+        "coins_type": "big_numbers"
+      }
     },
-    "gems": {
-      "gems_10": 0
+    "natan": {
+      "password": "Non",
+      "gems": 2,
+      "coins": 247,
+      "game_properties": {
+        "waves_game": {
+          "current_wave": 7
+        },
+        "difficulty": {
+          "current_difficulty": 1
+        }
+      },
+      "shops": {
+        "coins": {
+          "atk_speed_upgrade": 0,
+          "damage_upgrade": 0,
+          "health_upgrade": 0
+        },
+        "gems": {
+          "gems_10": 1,
+          "gems_25": 0,
+          "gems_50": 0,
+          "gems_100": 0
+        }
+      },
+      "settings": {
+        "coins_type": "big_numbers"
+      }
     }
   }
 }

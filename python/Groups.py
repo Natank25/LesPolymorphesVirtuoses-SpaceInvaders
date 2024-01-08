@@ -35,6 +35,7 @@ class UIGroup(AllSprites):
         super().__init__(*sprites)
 
 
+
 AllSpritesGroup: AllSprites = AllSprites()
 InvaderGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()
 PlayerGroup: pygame.sprite.RenderClear = pygame.sprite.RenderClear()

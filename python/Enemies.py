@@ -5,7 +5,8 @@ from random import randint
 import pygame
 
 from python import GameProperties
-from python import Groups, Utils, Resources
+from python import Groups, Resources
+from python import Utils
 from python.Resources import Ennemies
 
 pygame.init()
@@ -38,19 +39,23 @@ class Invader(Utils.Sprite):
         self.image = pygame.transform.scale_by(image, GameProperties.win_scale)
         self.speedx = random.choice([speedx * GameProperties.difficulty, -speedx * GameProperties.difficulty])
         self.speedy = speedy * GameProperties.difficulty / 3
+        self.shooter = shooter
+        self.atk_speed = atk_speed * 1000
+
         self.health = health * GameProperties.difficulty
         self.coin_drop = health * GameProperties.difficulty
         self.gem_drop = 1
-        self.shooter = shooter
-        self.atk_speed = atk_speed * 1000
+
         self.lastEsquive = pygame.time.get_ticks()
         self.nextEsquive = pygame.time.get_ticks() + randint(500, 5000)
         self.canEsquive = can_esquive
         self.rect = self.image.get_rect()
-        self.rect.topleft = (randint(GameProperties.win_size.x + 10, GameProperties.win_size.x + GameProperties.win_size.width - self.rect.width - 10), GameProperties.win_size.y + 10)
+        self.rect.center = (randint(GameProperties.win_size.x + self.rect.width + 15, GameProperties.win_size.x + GameProperties.win_size.width - self.rect.width - 15), GameProperties.win_size.y + 10)
+
         for invader in Groups.InvaderGroup.sprites():
             while self.rect.colliderect(invader.rect) and not self.rect.colliderect(GameProperties.win_size):
                 self.rect.x += random.randint(-self.image.get_width() - 10, self.image.get_width() + 10)
+
         self.next_shot = pygame.time.get_ticks() + self.atk_speed
         super().__init__(Groups.InvaderGroup)
 
@@ -58,10 +63,8 @@ class Invader(Utils.Sprite):
         self.health -= amount
 
     def avancer(self):
-
         self.rect.move_ip(self.speedx * GameProperties.deltatime * GameProperties.win_scale, self.speedy * GameProperties.deltatime * GameProperties.win_scale)
-
-        if self.rect.x < GameProperties.win_size.x or self.rect.x + self.rect.width > GameProperties.win_size.x + GameProperties.win_size.width:
+        if self.rect.x < GameProperties.win_size.x or self.rect.x + self.rect.width + self.speedx > GameProperties.win_size.x + GameProperties.win_size.width + self.speedx:
             self.speedx = -self.speedx
 
     def tirer(self):
@@ -86,17 +89,29 @@ class Invader(Utils.Sprite):
         self.tirer()
 
         if self.health < 0:
-            Resources.Ennemies.Sons.InvaderDeathSound.play()
             self.kill()
-            GameProperties.coins += self.coin_drop
-            if self.gem_drop == random.randint(0, 100):
-                GameProperties.gems += 1 + GameProperties.difficulty
 
         if GameProperties.does_player_exists and self.rect.center[1] > GameProperties.win_size.height + GameProperties.win_size.y:
-            self.kill()
             GameProperties.game_overed = True
+            self.kill()
+
+    def kill(self, animation=True):
+        if not GameProperties.game_overed and animation:
+            Resources.Ennemies.Sons.InvaderDeathSound.play()
+            if self.gem_drop == random.randint(0, 100):
+                GameProperties.gems += 1 + GameProperties.difficulty
+                Utils.show_gem_text(self.rect.move(0, 20).center, 1)
+
+            GameProperties.coins += self.coin_drop
+            Utils.show_coins_text(self.rect.center, self.coin_drop)
+
+            img_explosion = random.choice([Resources.Ennemies.Images.Explosion, Resources.Ennemies.Images.Explosion_pink, Resources.Ennemies.Images.Explosion_purple])
+            Utils.AnimatedSprite(self.rect.center, img_explosion, 13, 50, True, rotable=True)
+
+        super().kill()
 
 
+# region Invaders
 class CommonInvader1(Invader):
     def __init__(self):
         super().__init__(EnemyAttributes.CommonInvaders1DefaultSpeedx.value, EnemyAttributes.CommonInvaders1DefaultSpeedy.value, EnemyAttributes.CommonInvaders1DefaultHealth.value,
@@ -117,7 +132,7 @@ class CommonInvader3(Invader):
 
 class SpeedInvader1(Invader):
     def __init__(self):
-        super().__init__(EnemyAttributes.SpeedInvader1DefaultSpeedx.value, EnemyAttributes.SpeedInvader1DefaultSpeedy.value, EnemyAttributes.SpeedInvader2DefaultHealth.value,
+        super().__init__(EnemyAttributes.SpeedInvader1DefaultSpeedx.value, EnemyAttributes.SpeedInvader1DefaultSpeedy.value, EnemyAttributes.SpeedInvader1DefaultHealth.value,
                          Ennemies.Images.SpeedInvader1)
 
 
@@ -129,8 +144,8 @@ class SpeedInvader2(Invader):
 
 class SpeedInvader3(Invader):
     def __init__(self):
-        super().__init__(EnemyAttributes.SpeedInvader3DefaultSpeedx.value + (GameProperties.difficulty / 10), EnemyAttributes.SpeedInvader3DefaultSpeedy.value + (GameProperties.difficulty / 20),
-                         EnemyAttributes.SpeedInvader3DefaultHealth.value * (1 + GameProperties.difficulty), Ennemies.Images.SpeedInvader3)
+        super().__init__(EnemyAttributes.SpeedInvader3DefaultSpeedx.value, EnemyAttributes.SpeedInvader3DefaultSpeedy.value, EnemyAttributes.SpeedInvader3DefaultHealth.value,
+                         Ennemies.Images.SpeedInvader3)
 
 
 class TankInvader1(Invader):
@@ -141,14 +156,14 @@ class TankInvader1(Invader):
 
 class TankInvader2(Invader):
     def __init__(self):
-        super().__init__(EnemyAttributes.TankInvader2DefaultSpeedx.value + (GameProperties.difficulty / 10), EnemyAttributes.TankInvader2DefaultSpeedy.value + (GameProperties.difficulty / 20),
-                         EnemyAttributes.TankInvader2DefaultHealth.value * (1 + GameProperties.difficulty), Ennemies.Images.TankInvader2)
+        super().__init__(EnemyAttributes.TankInvader2DefaultSpeedx.value, EnemyAttributes.TankInvader2DefaultSpeedy.value, EnemyAttributes.TankInvader2DefaultHealth.value,
+                         Ennemies.Images.TankInvader2)
 
 
 class TankInvader3(Invader):
     def __init__(self):
-        super().__init__(EnemyAttributes.TankInvader3DefaultSpeedx.value + (GameProperties.difficulty / 10), EnemyAttributes.TankInvader3DefaultSpeedy.value + (GameProperties.difficulty / 20),
-                         EnemyAttributes.TankInvader3DefaultHealth.value * (1 + GameProperties.difficulty), Ennemies.Images.TankInvader3)
+        super().__init__(EnemyAttributes.TankInvader3DefaultSpeedx.value, EnemyAttributes.TankInvader3DefaultSpeedy.value, EnemyAttributes.TankInvader3DefaultHealth.value,
+                         Ennemies.Images.TankInvader3)
 
 
 class ShooterInvader1(Invader):
@@ -159,37 +174,56 @@ class ShooterInvader1(Invader):
 
 class ShooterInvader2(Invader):
     def __init__(self):
-        super().__init__(EnemyAttributes.ShooterInvader2DefaultSpeedx.value + (GameProperties.difficulty / 10), EnemyAttributes.ShooterInvader2DefaultSpeedy.value + (GameProperties.difficulty / 20),
-                         EnemyAttributes.ShooterInvader2DefaultHealth.value * (1 + GameProperties.difficulty), Ennemies.Images.SpeedInvader1, shooter=True, atk_speed=1.5)
+        super().__init__(EnemyAttributes.ShooterInvader2DefaultSpeedx.value, EnemyAttributes.ShooterInvader2DefaultSpeedy.value, EnemyAttributes.ShooterInvader2DefaultHealth.value,
+                         Ennemies.Images.SpeedInvader1, shooter=True, atk_speed=3.5)
 
 
 class ShooterInvader3(Invader):
     def __init__(self):
-        super().__init__(EnemyAttributes.ShooterInvader3DefaultSpeedx.value + (GameProperties.difficulty / 10), EnemyAttributes.ShooterInvader3DefaultSpeedy.value + (GameProperties.difficulty / 20),
-                         EnemyAttributes.ShooterInvader3DefaultHealth.value * (1 + GameProperties.difficulty), Ennemies.Images.SpeedInvader1, shooter=True, atk_speed=2)
+        super().__init__(EnemyAttributes.ShooterInvader3DefaultSpeedx.value, EnemyAttributes.ShooterInvader3DefaultSpeedy.value, EnemyAttributes.ShooterInvader3DefaultHealth.value,
+                         Ennemies.Images.SpeedInvader1, shooter=True, atk_speed=4.5)
 
+
+# endregion
 
 class Boss(Utils.Sprite):
-    def __init__(self, hauteur, speedx, speedy, health, image, atk_speed=0, sound=Resources.Ennemies.Sons.BossSound):
-        self.next_shot = pygame.time.get_ticks() + atk_speed + GameProperties.difficulty
-        self.speedx = speedx + (GameProperties.difficulty / 10)
+
+    def __init__(self, speedx, speedy, health, boss_name, cooldown_attack=5000):
+        # self.next_shot = pygame.time.get_ticks() + atk_speed + GameProperties.difficulty
+
         self.speedy = speedy + (GameProperties.difficulty / 20)
         self.health = health * (1 + GameProperties.difficulty)
-        self.image = image
-        self.rect = self.image.get_rect(topleft=(randint(GameProperties.win_size.x, GameProperties.win_size.x + GameProperties.win_size.width - self.image.get_width()), hauteur))
-        self.sound = sound
+
+        self.image = eval("Resources.Bosses.Images.Boss" + boss_name + "Body")
+        self.rect: pygame.rect.Rect = self.image.get_rect(topleft=(GameProperties.win_size.x + GameProperties.win_size.width * 0.5 - self.image.get_width() // 2, 25))
+
+        self.upper_arm_image = eval("Resources.Bosses.Images.Boss" + boss_name + "UpperArm")
+        self.lower_arm_image = eval("Resources.Bosses.Images.Boss" + boss_name + "LowerArm")
+        self.sound = eval("Resources.Bosses.Sons.Boss" + boss_name + "Sound")
+        self.sound.play()
+
         self.coin_drop = health * GameProperties.difficulty
         self.gem_drop = 1
 
-        self.sound.play()
+        self.target_x = GameProperties.win_size.x + GameProperties.win_size.width * 0.5 - self.image.get_width() // 2
+        self.easing = False
+        self.start_x = 0
+        self.start_time = 0
+        self.duration = 0
+        self.next_move = pygame.time.get_ticks() + randint(1000, 5000)
+
+        self.cooldown_attacks = cooldown_attack
+        self.next_attack = pygame.time.get_ticks() + self.cooldown_attacks
+
         super().__init__(Groups.InvaderGroup)
+
+        self.arms = []
+        upper_arm_right = Utils.PivotSprite(self.rect.move(180, 130).topleft, (0, -48), self.upper_arm_image, speed=50)
+        upper_arm_right.set_rotation(45)
+        self.arms.append(upper_arm_right)
 
     def update(self):
         super().update()
-        if GameProperties.paused:
-            self.next_shot += int(GameProperties.deltatime)
-
-        self.avancer()
 
         if self.health < 0:
             self.kill()
@@ -200,25 +234,161 @@ class Boss(Utils.Sprite):
         if GameProperties.does_player_exists and self.rect.center[1] > GameProperties.win_size.height + GameProperties.win_size.y:
             self.kill()
             GameProperties.game_overed = True
+        if randint(0, 10) == 5:
+            self.arms[0].set_rotation(randint(0, 360))
 
-    def avancer(self):
+        self.move()
+        self.try_attack()
 
-        self.rect.move_ip(self.speedx * GameProperties.deltatime * GameProperties.win_scale, self.speedy * GameProperties.deltatime * GameProperties.win_scale)
+    def move(self):
+        if self.easing:
+            # Calculate the eased position based on time elapsed
+            elapsed_time = pygame.time.get_ticks() - self.start_time
+            progress = elapsed_time / self.duration
+            if progress > 1:
+                progress = 1
 
-        if self.rect.x < GameProperties.win_size.x or self.rect.x + self.rect.width > GameProperties.win_size.x + GameProperties.win_size.width:
-            self.speedx = -self.speedx
+            eased_progress = Utils.Easings.ease_out_elastic(progress)
+            next_pos = round(self.start_x + eased_progress * (self.target_x - self.start_x))
+            next_pos = max(0, min(next_pos, GameProperties.win_size.x + GameProperties.win_size.width - self.image.get_width()))
+
+            diff = next_pos - self.rect.x
+            self.rect.x += diff
+
+            for arm in self.arms:
+                arm.move(diff, 0)
+
+            if progress == 1:
+                self.next_move = pygame.time.get_ticks() + randint(1000, 5000)
+                self.easing = False
+        else:
+            if self.next_move < pygame.time.get_ticks():
+                _target_x = GameProperties.win_size.x + randint(0, GameProperties.win_size.width - self.image.get_width())
+
+                while abs(_target_x - self.rect.x) < 75:
+                    _target_x = GameProperties.win_size.x + randint(0, GameProperties.win_size.width - self.image.get_width())
+
+                self.start_x = self.rect.x
+                distance = abs(_target_x - self.start_x)
+                self.duration = distance / 20 * 1000  # Calculate duration based on speed
+                if self.duration == 0:
+                    self.duration = 1
+                self.target_x = _target_x
+                self.start_time = pygame.time.get_ticks()
+                self.easing = True
+
+    def try_attack(self):
+        if self.next_attack < pygame.time.get_ticks():
+            self.next_attack = pygame.time.get_ticks() + self.cooldown_attacks + random.randint(-2000, 2000)
+            attack = random.randint(0, 5)
+            if attack == 0:
+                Attack1Rect(3000, 5, 250, [GameProperties.win_size.x + GameProperties.win_size.width * 0.42, GameProperties.win_size.height * 0.8], midtop=self.rect.move(0, 20).midbottom)
+            elif attack == 1 or attack == 2:
+                random_space = random.randint(5, 10) / 100
+                Attack2Rect(3500, 5, 250, [GameProperties.win_size.x + GameProperties.win_size.width * 0.1, GameProperties.win_size.height + GameProperties.win_size.y],
+                            midtop=(GameProperties.win_size.x + GameProperties.win_size.width * 0.5, GameProperties.win_size.y + GameProperties.win_size.height * (0.275 + random_space)),
+                            space_between=GameProperties.win_size.height * (0.15 + random_space * 0.7))
+            else:
+                for i in range(random.randint(7, 10)):
+                    Attack1Circle(random.randrange(0, GameProperties.win_size.width), random.randrange(GameProperties.win_size.height * 0.4, GameProperties.win_size.height), 5)
 
     def apply_damage(self, damage):
         self.health -= damage
+
+    def kill(self, **kwargs):
+        self.sound.stop()
+        for arm in self.arms:
+            arm.kill()
+        super().kill()
+
+
+class Attack1Rect(Utils.Sprite):
+    def __init__(self, fade_in, damage, fade_out, size, color=(255, 0, 0, 255), rotation=0, **kwargs):
+        super().__init__()
+        self.color = color
+        self.fade_out = fade_out
+        self.damage = damage
+        self.fade_in = fade_in
+        self.surf = pygame.transform.rotate(pygame.surface.Surface(size, pygame.SRCALPHA), rotation)
+        pygame.draw.rect(self.surf, self.color, self.surf.get_rect(), 5)
+        self.image = self.surf
+        self.image.set_alpha(0)
+        self.rect = self.image.get_rect(**kwargs)
+        self.spawn_tick = pygame.time.get_ticks()
+        self.has_attacked = False
+
+    def update(self):
+        if self.spawn_tick + self.fade_in > pygame.time.get_ticks():
+            progress = Utils.Easings.easeInOutSine((pygame.time.get_ticks() - self.spawn_tick) / self.fade_in)
+            self.image.set_alpha(round(progress * 200))
+
+        elif self.spawn_tick + self.fade_in + self.fade_out > pygame.time.get_ticks():
+            if not self.has_attacked:
+                self.surf.fill(self.color)
+                for player in Groups.PlayerGroup.sprites():
+                    if self.rect.colliderect(player.rect):
+                        player.apply_damage(self.damage)
+                self.has_attacked = True
+
+            progress = Utils.Easings.easeInOutSine((pygame.time.get_ticks() - self.spawn_tick - self.fade_in) / self.fade_out)
+            self.image.set_alpha(round(200 + progress * (-200)))
+
+        elif self.image.get_alpha() == 0:
+            self.kill()
+
+
+class Attack1Circle(Utils.Sprite):
+    def __init__(self, x, y, damage):
+        super().__init__()
+        self.size = random.randint(50, 200)
+        self.image = pygame.Surface((self.size, self.size), pygame.SRCALPHA)
+        self.radius = self.size // 2
+        self.rect = self.image.get_rect(center=(x, y))
+        self.fade = 0
+        self.border_fade = 0
+        self.fade_out_start = pygame.time.get_ticks() + 4000
+        self.damage = damage
+        self.has_attacked = False
+
+    def update(self):
+        if self.fade_out_start <= pygame.time.get_ticks():
+            if not self.has_attacked:
+                for player in Groups.PlayerGroup.sprites():
+                    if pygame.sprite.collide_circle(self, player):
+                        player.apply_damage(self.damage)
+                self.has_attacked = True
+
+            self.fade -= 10
+            self.border_fade -= 10
+            if self.fade <= 0:
+                self.fade = 0
+                self.border_fade = 0
+                self.kill()
+        else:
+            self.border_fade += 1.25
+            if self.border_fade >= 255 or self.fade >= 255:
+                self.fade = 255
+                self.border_fade = 255
+        self.image.fill((0, 0, 0, 0))
+        pygame.draw.circle(self.image, (255, 0, 0, self.fade), (self.radius, self.radius), self.radius)
+        pygame.draw.circle(self.image, (255, 0, 0, self.border_fade), (self.radius, self.radius), self.radius, 4)
+
+
+class Attack2Rect:
+    def __init__(self, fade_in, damage, fade_out, size, color=(255, 0, 0, 255), space_between=150, **kwargs):
+        pos = kwargs.get("midtop")
+        Attack1Rect(fade_in, damage, fade_out, (size[0]+25, size[1]), color, rotation=0, center=(GameProperties.win_size.width * 0.33, GameProperties.win_size.height * 0.7))
+        Attack1Rect(fade_in, damage, fade_out, (size[0]+25, size[1]), color, rotation=0, center=(GameProperties.win_size.width * 0.67, GameProperties.win_size.height * 0.7))
+        for i in range(0, 4):
+            Attack1Rect(fade_in, damage, fade_out, size, color, rotation=90, midtop=(pos[0], pos[1] + space_between * i))
 
 
 # region Bosses
 
 
 class Boss1(Boss):
-    def __init__(self, hauteur=25):
-        super().__init__(hauteur, EnemyAttributes.Boss1DefaultSpeedx.value, EnemyAttributes.Boss1DefaultSpeedy.value, EnemyAttributes.Boss1DefaultHealth.value, Ennemies.Images.CommonInvader1,
-                         EnemyAttributes.Boss1DefaultSpeedATK.value)
+    def __init__(self):
+        super().__init__(EnemyAttributes.Boss1DefaultSpeedx.value, EnemyAttributes.Boss1DefaultSpeedy.value, EnemyAttributes.Boss1DefaultHealth.value, "5", EnemyAttributes.Boss1DefaultSpeedATK.value)
 
     def main_attack(self):
         pass
@@ -358,39 +528,39 @@ class Boss20(Boss):
 
 class EnemyAttributes(Enum):
     # common
-    CommonInvaders1DefaultHealth = 1
+    CommonInvaders1DefaultHealth = 2
     CommonInvaders1DefaultSpeedx = 0.1
     CommonInvaders1DefaultSpeedy = 0.2
 
-    CommonInvaders2DefaultHealth = 5
+    CommonInvaders2DefaultHealth = 25
     CommonInvaders2DefaultSpeedx = 0.1
     CommonInvaders2DefaultSpeedy = 0.2
 
-    CommonInvaders3DefaultHealth = 25
+    CommonInvaders3DefaultHealth = 100
     CommonInvaders3DefaultSpeedx = 0.1
     CommonInvaders3DefaultSpeedy = 0.2
 
     # speed
-    SpeedInvader1DefaultHealth = 1
+    SpeedInvader1DefaultHealth = 2
     SpeedInvader1DefaultSpeedx = 0.15
     SpeedInvader1DefaultSpeedy = 0.45
 
-    SpeedInvader2DefaultHealth = 3
+    SpeedInvader2DefaultHealth = 10
     SpeedInvader2DefaultSpeedx = 0.2
     SpeedInvader2DefaultSpeedy = 0.5
 
-    SpeedInvader3DefaultHealth = 15
+    SpeedInvader3DefaultHealth = 25
     SpeedInvader3DefaultSpeedx = 0.25
     SpeedInvader3DefaultSpeedy = 0.55
 
     # tank
     TankInvader1DefaultHealth = 25
-    TankInvader1DefaultSpeedx = 0.05
+    TankInvader1DefaultSpeedx = 0.075
     TankInvader1DefaultSpeedy = 0.1
 
-    TankInvader2DefaultHealth = 100
-    TankInvader2DefaultSpeedx = 0.2
-    TankInvader2DefaultSpeedy = 0.075
+    TankInvader2DefaultHealth = 200
+    TankInvader2DefaultSpeedx = 0.075
+    TankInvader2DefaultSpeedy = 0.1
 
     TankInvader3DefaultHealth = 500
     TankInvader3DefaultSpeedx = 0.2
@@ -402,21 +572,21 @@ class EnemyAttributes(Enum):
     ShooterInvader1DefaultSpeedy = 0.2
     ShooterInvader1DefaultSpeedATK = 1
 
-    ShooterInvader2DefaultHealth = 50
-    ShooterInvader2DefaultSpeedx = 2
-    ShooterInvader2DefaultSpeedy = 0.2
+    ShooterInvader2DefaultHealth = 25
+    ShooterInvader2DefaultSpeedx = 0.1
+    ShooterInvader2DefaultSpeedy = 0.1
     ShooterInvader2DefaultSpeedATK = 1.5
 
-    ShooterInvader3DefaultHealth = 150
-    ShooterInvader3DefaultSpeedx = 2
-    ShooterInvader3DefaultSpeedy = 0.2
+    ShooterInvader3DefaultHealth = 100
+    ShooterInvader3DefaultSpeedx = 0.15
+    ShooterInvader3DefaultSpeedy = 0.1
     ShooterInvader3DefaultSpeedATK = 2
 
     # Boss
-    Boss1DefaultHealth = 150
+    Boss1DefaultHealth = 200
     Boss1DefaultSpeedx = 0.01
     Boss1DefaultSpeedy = 0.01
-    Boss1DefaultSpeedATK = 1
+    Boss1DefaultSpeedATK = 7000
 
     Boss2DefaultHealth = 250
     Boss2DefaultSpeedx = 0.01
