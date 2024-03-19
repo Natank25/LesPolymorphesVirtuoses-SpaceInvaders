@@ -2,8 +2,12 @@
   "players": {
     "guest": {
       "password": "none",
-      "gems": 0,
-      "coins": 0,
+      "gems": {
+        "_mutable_object": 0
+      },
+      "coins": {
+        "_mutable_object": 0
+      },
       "game_properties": {
         "waves_game": {
           "current_wave": 0
@@ -14,77 +18,14 @@
       },
       "shops": {
         "coins": {
-          "atk_speed_upgrade": 1,
-          "damage_upgrade": 0,
-          "health_upgrade": 0
-        },
-        "gems": {
-          "gems_10": 1,
-          "gems_25": 0,
-          "gems_50": 0,
-          "gems_100": 0
-        }
-      },
-      "settings": {
-        "coins_type": "big_numbers"
-      }
-    },
-    "teest": {
-      "password": "reset",
-      "gems": 0,
-      "coins": 3,
-      "game_properties": {
-        "waves_game": {
-          "current_wave": 1
-        },
-        "difficulty": {
-          "current_difficulty": 1
-        }
-      },
-      "shops": {
-        "coins": {
           "atk_speed_upgrade": 0,
           "damage_upgrade": 0,
           "health_upgrade": 0
         },
-        "gems": {
-          "gems_10": 1,
-          "gems_25": 0,
-          "gems_50": 0,
-          "gems_100": 0
-        }
+        "gems": {}
       },
       "settings": {
-        "coins_type": "big_numbers"
-      }
-    },
-    "natan": {
-      "password": "Non",
-      "gems": 2,
-      "coins": 247,
-      "game_properties": {
-        "waves_game": {
-          "current_wave": 7
-        },
-        "difficulty": {
-          "current_difficulty": 1
-        }
-      },
-      "shops": {
-        "coins": {
-          "atk_speed_upgrade": 0,
-          "damage_upgrade": 0,
-          "health_upgrade": 0
-        },
-        "gems": {
-          "gems_10": 1,
-          "gems_25": 0,
-          "gems_50": 0,
-          "gems_100": 0
-        }
-      },
-      "settings": {
-        "coins_type": "big_numbers"
+        "coins_type": "big_number"
       }
     }
   }

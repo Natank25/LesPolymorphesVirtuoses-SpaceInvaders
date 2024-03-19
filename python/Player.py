@@ -42,15 +42,16 @@ class Balle(Utils.Sprite):
             self.kill()
         collided_sprites = pygame.sprite.spritecollide(self, Groups.InvaderGroup, False)
         for invader in collided_sprites:
-            invader.apply_damage(self.damage)
-            self.kill()
-            break
+            if hasattr(invader, "apply_damage"):
+                invader.apply_damage(self.damage)
+                self.kill()
+                break
 
 
 class Player(Utils.Sprite):
     def __init__(self):
         super().__init__(Groups.PlayerGroup)
-        self.image = Resources.Player.Images.Vaisseau_Base
+        self.image = GameProperties.skin
         self.image = pygame.transform.scale_by(self.image, GameProperties.win_scale)
         self.rect = self.image.get_rect()
         self.rect.x = randint(GameProperties.win_size.x,

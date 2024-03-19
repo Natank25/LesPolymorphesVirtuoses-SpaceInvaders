@@ -1,6 +1,13 @@
 import json
 
-from python import GameProperties
+from python import GameProperties, Utils
+
+
+class CustomEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Utils.MutableObject):
+            return {'_mutable_object': obj._value}
+        return super().default(obj)
 
 
 class DataManager:
@@ -21,9 +28,24 @@ class DataManager:
     """
 
     @staticmethod
+    def get_coins_player(username):
+        with open("data.json", 'r') as f:
+            data = json.load(f)
+            return data["players"][username]["coins"]
+
+    @staticmethod
+    def get_gems_player(username):
+        with open("data.json", 'r') as f:
+            data = json.load(f)
+            return data["players"][username]["gems"]
+
+    @staticmethod
     def save_game(username):
         with open("data.json", 'rt') as f:
             current_save = json.load(f)
+
+        if username in current_save["players"]:
+            return "Account with username '" + username + "' already exists.'"
 
         new_data = {
             username: {
@@ -52,19 +74,7 @@ class DataManager:
         current_save["players"].update(new_data)
 
         with open("data.json", "w") as f:
-            f.write(json.dumps(current_save, indent=2, sort_keys=False))
-
-    @staticmethod
-    def get_coins_player(username):
-        with open("data.json", 'r') as f:
-            data = json.load(f)
-            return data["players"][username]["coins"]
-
-    @staticmethod
-    def get_gems_player(username):
-        with open("data.json", 'r') as f:
-            data = json.load(f)
-            return data["players"][username]["gems"]
+            f.write(json.dumps(current_save, indent=2, sort_keys=False, cls=CustomEncoder))
 
     @staticmethod
     def get_current_waves(username):
@@ -113,9 +123,6 @@ class DataManager:
         with open("data.json", 'rt') as f:
             current_save = json.load(f)
 
-        # if username in current_save["players"]:
-        # return "Account with username '" + username + "' already exists."
-
         GameProperties.password = password
 
         new_player = {
@@ -146,28 +153,27 @@ class DataManager:
         current_save["players"].update(new_player)
 
         with open("data.json", "w") as f:
-            f.write(json.dumps(current_save, indent=2, sort_keys=False))
+            f.write(json.dumps(current_save, indent=2, sort_keys=False, cls=CustomEncoder))
 
     @staticmethod
     def load_game(username="guest"):
         if username == "guest":
             GameProperties.difficulty = 1
             GameProperties.current_wave = 0
-            GameProperties.coins = 0
-            GameProperties.gems = 0
+            GameProperties.coins = Utils.MutableNumber(0)
+            GameProperties.gems = Utils.MutableNumber(0)
             GameProperties.coin_shop = {"atk_speed_upgrade": 0, "damage_upgrade": 0, "health_upgrade": 0}
-            GameProperties.gems_shop = {"gems_10": 0, "gems_25": 0, "gems_50": 0, "gems_100": 0}
+            GameProperties.gems_shop = {"gems_10": 0, "gems_25": 0, "gems_50": 0, "gems_100": 0, "red1_skin": 0}
 
         else:
             GameProperties.difficulty = DataManager.get_difficulty(username)
             GameProperties.current_wave = DataManager.get_current_waves(username)
-            GameProperties.coins = DataManager.get_coins_player(username)
-            GameProperties.gems = DataManager.get_gems_player(username)
+            GameProperties.coins = Utils.MutableNumber(DataManager.get_coins_player(username))
+            GameProperties.gems = Utils.MutableNumber(DataManager.get_gems_player(username))
             GameProperties.coin_shop = DataManager.get_coin_shop(username)
             GameProperties.gems_shop = DataManager.get_gems_shop(username)
             GameProperties.username = username
             GameProperties.password = DataManager.get_password(username)
-
 
     @staticmethod
     def verify_successful_login(username, password):
@@ -175,6 +181,6 @@ class DataManager:
             data = json.load(f)
             if username in data["players"] and "password" in data["players"][username]:
                 if data["players"][username]["password"] == password:
-                    return True
-
-            return False
+                    return "logged in with the name", username
+                return "wrong password for the password", username
+            return "not account registered"

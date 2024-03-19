@@ -2,6 +2,7 @@ import pygame
 
 print(27, pygame.time.get_ticks())
 from python import GameProperties
+
 print(28, pygame.time.get_ticks())
 
 pygame.init()
@@ -33,7 +34,6 @@ class AllSprites(pygame.sprite.RenderClear):
 class UIGroup(AllSprites):
     def __init__(self, *sprites):
         super().__init__(*sprites)
-
 
 
 AllSpritesGroup: AllSprites = AllSprites()

@@ -46,6 +46,7 @@ def send_waves_levels(num_wave):
             spawnEnemy(EnemyType.BOSS1)
 
         case 6:
+            pygame.mixer.music.stop()
             for i in range(2 + GameProperties.difficulty):
                 spawnEnemy(EnemyType.COMMONINVADER1, 1500 * i)
                 spawnEnemy(EnemyType.SPEEDINVADER1, 3000 * i)
@@ -80,6 +81,7 @@ def send_waves_levels(num_wave):
             pass
 
         case 11:
+            pygame.mixer.music.stop()
             for i in range(2 + GameProperties.difficulty):
                 spawnEnemy(EnemyType.SPEEDINVADER2, 2500 * i)
                 spawnEnemy(EnemyType.TANKINVADER1, 5000 * i)
@@ -409,7 +411,6 @@ def update():
             if delay <= pygame.time.get_ticks():
                 next_spawns.pop(i_dict)
                 spawnEnemy(enemy_type)
-
 
 
 def spawn_current_wave():

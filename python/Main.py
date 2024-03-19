@@ -30,7 +30,6 @@ else:
 wanted_ratio = [8, 5]
 win_size = GameProperties.default_win_size.copy()
 
-
 GameProperties.screen = pygame.display.set_mode((win_size[0], win_size[1]))
 
 background_rect = GameProperties.background.get_rect()
@@ -82,8 +81,8 @@ pygame.display.set_caption("Space Invaders")
 
 running = True
 
-if Resources.Game.Sons.BackgroundSound.get_num_channels() == 0:
-    Resources.Game.Sons.BackgroundSound.play()
+# if Resources.Game.Sons.BackgroundSound.get_num_channels() == 0:
+# Resources.Game.Sons.BackgroundSound.play(
 
 # UIManager.show_login()
 UIManager.show_starting_screen()

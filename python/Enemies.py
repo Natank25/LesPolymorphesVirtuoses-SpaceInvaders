@@ -3,6 +3,7 @@ from enum import Enum
 from random import randint
 
 import pygame
+from pygame import Vector2
 
 from python import GameProperties
 from python import Groups, Resources
@@ -13,18 +14,20 @@ pygame.init()
 
 
 class Balle(Utils.Sprite):
-    def __init__(self, pos, speed=3, damage=1):
-        self.image = Ennemies.Images.Balle
-        self.image = pygame.transform.scale_by(self.image, GameProperties.win_scale)
-        self.image = pygame.transform.rotate(self.image, 180)
-        self.rect = self.image.get_rect(center=pos)
+    def __init__(self, pos, speed=3, damage=1, angle=0):
         self.speed = speed
         self.damage = damage
+        self.angle = angle
+
+        self.image = Ennemies.Images.Balle
+        self.image = pygame.transform.scale_by(self.image, GameProperties.win_scale)
+        self.image = pygame.transform.rotate(self.image, self.angle - 180)
+        self.rect = self.image.get_rect(center=pos)
         super().__init__(Groups.EnemiesBulletGroup)
 
     def update(self):
         super().update()
-        self.rect.move_ip(0, self.speed)
+        self.rect.move_ip(Vector2(0, self.speed).rotate(self.angle))
         if self.rect.top > GameProperties.win_size.height + GameProperties.win_size.y:
             self.kill()
 
@@ -34,9 +37,14 @@ class Balle(Utils.Sprite):
             self.kill()
 
 
-class Invader(Utils.Sprite):
+class Invader(Utils.AnimatedSprite):
     def __init__(self, speedx, speedy, health, image, atk_speed: float = 0, shooter=False, can_esquive=False):
-        self.image = pygame.transform.scale_by(image, GameProperties.win_scale)
+
+        super().__init__(
+            (randint(GameProperties.win_size.x + (image.get_width() // 2) + 15,
+                     GameProperties.win_size.x + GameProperties.win_size.width - (image.get_width() // 2) - 15), GameProperties.win_size.y + 10), image,
+            Groups.InvaderGroup)
+
         self.speedx = random.choice([speedx * GameProperties.difficulty, -speedx * GameProperties.difficulty])
         self.speedy = speedy * GameProperties.difficulty / 3
         self.shooter = shooter
@@ -49,15 +57,12 @@ class Invader(Utils.Sprite):
         self.lastEsquive = pygame.time.get_ticks()
         self.nextEsquive = pygame.time.get_ticks() + randint(500, 5000)
         self.canEsquive = can_esquive
-        self.rect = self.image.get_rect()
-        self.rect.center = (randint(GameProperties.win_size.x + self.rect.width + 15, GameProperties.win_size.x + GameProperties.win_size.width - self.rect.width - 15), GameProperties.win_size.y + 10)
 
         for invader in Groups.InvaderGroup.sprites():
             while self.rect.colliderect(invader.rect) and not self.rect.colliderect(GameProperties.win_size):
                 self.rect.x += random.randint(-self.image.get_width() - 10, self.image.get_width() + 10)
 
         self.next_shot = pygame.time.get_ticks() + self.atk_speed
-        super().__init__(Groups.InvaderGroup)
 
     def apply_damage(self, amount):
         self.health -= amount
@@ -106,7 +111,7 @@ class Invader(Utils.Sprite):
             Utils.show_coins_text(self.rect.center, self.coin_drop)
 
             img_explosion = random.choice([Resources.Ennemies.Images.Explosion, Resources.Ennemies.Images.Explosion_pink, Resources.Ennemies.Images.Explosion_purple])
-            Utils.AnimatedSprite(self.rect.center, img_explosion, 13, 50, True, rotable=True)
+            Utils.AnimatedSprite(self.rect.center, img_explosion, Groups.AllSpritesGroup, frame_time=50, kill_when_done=True, rotable=True)
 
         super().kill()
 
@@ -186,9 +191,9 @@ class ShooterInvader3(Invader):
 
 # endregion
 
-class Boss(Utils.Sprite):
+class Boss(Utils.Body):
 
-    def __init__(self, speedx, speedy, health, boss_name, cooldown_attack=5000):
+    def __init__(self, speedx, speedy, health, boss_name, cooldown_attack=5000, cooldown_bullet=1500, shooter_arm_id=1):
         # self.next_shot = pygame.time.get_ticks() + atk_speed + GameProperties.difficulty
 
         self.speedy = speedy + (GameProperties.difficulty / 20)
@@ -199,28 +204,38 @@ class Boss(Utils.Sprite):
 
         self.upper_arm_image = eval("Resources.Bosses.Images.Boss" + boss_name + "UpperArm")
         self.lower_arm_image = eval("Resources.Bosses.Images.Boss" + boss_name + "LowerArm")
-        self.sound = eval("Resources.Bosses.Sons.Boss" + boss_name + "Sound")
-        self.sound.play()
 
         self.coin_drop = health * GameProperties.difficulty
         self.gem_drop = 1
 
-        self.target_x = GameProperties.win_size.x + GameProperties.win_size.width * 0.5 - self.image.get_width() // 2
-        self.easing = False
-        self.start_x = 0
-        self.start_time = 0
-        self.duration = 0
         self.next_move = pygame.time.get_ticks() + randint(1000, 5000)
 
         self.cooldown_attacks = cooldown_attack
         self.next_attack = pygame.time.get_ticks() + self.cooldown_attacks
 
-        super().__init__(Groups.InvaderGroup)
+        self.cooldown_bullet = cooldown_bullet
+        self.next_shot = pygame.time.get_ticks() + self.cooldown_bullet
 
+        self.sound = Resources.Ennemies.Sons.InvaderDeathSound
+
+        super().__init__(self.image, Groups.InvaderGroup, topleft=(GameProperties.win_size.x + GameProperties.win_size.width * 0.5 - self.image.get_width() // 2, 25))
         self.arms = []
-        upper_arm_right = Utils.PivotSprite(self.rect.move(180, 130).topleft, (0, -48), self.upper_arm_image, speed=50)
-        upper_arm_right.set_rotation(45)
-        self.arms.append(upper_arm_right)
+
+        # Right arm
+        self.upper_right_arm = Utils.Bone(self, (115, 11), (0, 41), self.upper_arm_image, True)
+        self.arms.append(self.upper_right_arm)
+
+        self.lower_right_arm = Utils.Bone(self.upper_right_arm, (0, 40), (0, 41), self.lower_arm_image, True)
+        self.arms.append(self.lower_right_arm)
+
+        # Left arm
+        self.upper_left_arm = Utils.Bone(self, (-115, 11), (0, 41), self.upper_arm_image, True)
+        self.arms.append(self.upper_left_arm)
+
+        self.lower_left_arm = Utils.Bone(self.upper_left_arm, (0, 40), (0, 41), self.lower_arm_image, True)
+        self.arms.append(self.lower_left_arm)
+
+        self.shooter_arm = self.arms[shooter_arm_id]
 
     def update(self):
         super().update()
@@ -234,48 +249,27 @@ class Boss(Utils.Sprite):
         if GameProperties.does_player_exists and self.rect.center[1] > GameProperties.win_size.height + GameProperties.win_size.y:
             self.kill()
             GameProperties.game_overed = True
-        if randint(0, 10) == 5:
-            self.arms[0].set_rotation(randint(0, 360))
 
-        self.move()
-        self.try_attack()
-
-    def move(self):
-        if self.easing:
-            # Calculate the eased position based on time elapsed
-            elapsed_time = pygame.time.get_ticks() - self.start_time
-            progress = elapsed_time / self.duration
-            if progress > 1:
-                progress = 1
-
-            eased_progress = Utils.Easings.ease_out_elastic(progress)
-            next_pos = round(self.start_x + eased_progress * (self.target_x - self.start_x))
-            next_pos = max(0, min(next_pos, GameProperties.win_size.x + GameProperties.win_size.width - self.image.get_width()))
-
-            diff = next_pos - self.rect.x
-            self.rect.x += diff
-
-            for arm in self.arms:
-                arm.move(diff, 0)
-
-            if progress == 1:
-                self.next_move = pygame.time.get_ticks() + randint(1000, 5000)
-                self.easing = False
-        else:
+        if not GameProperties.paused:
             if self.next_move < pygame.time.get_ticks():
-                _target_x = GameProperties.win_size.x + randint(0, GameProperties.win_size.width - self.image.get_width())
+                self.move_to(Vector2(GameProperties.win_size.x + randint(self.image.get_width() // 2, GameProperties.win_size.width - self.image.get_width() // 2), self.rect.centery))
+                self.next_move = pygame.time.get_ticks() + randint(1000, 5000)
 
-                while abs(_target_x - self.rect.x) < 75:
-                    _target_x = GameProperties.win_size.x + randint(0, GameProperties.win_size.width - self.image.get_width())
+            if randint(0, 50) == 0:
+                arm = random.randint(0, 3)
+                if arm == 0:
+                    self.arms[arm].set_rotation(randint(-130, 45))
+                elif arm == 1:
+                    angle = 1
+                    self.arms[arm].set_rotation(randint(-60, 30))
+                elif arm == 2:
+                    self.arms[arm].set_rotation(randint(-45, 130))
+                elif arm == 3:
+                    self.arms[arm].set_rotation(randint(-30, 60))
 
-                self.start_x = self.rect.x
-                distance = abs(_target_x - self.start_x)
-                self.duration = distance / 20 * 1000  # Calculate duration based on speed
-                if self.duration == 0:
-                    self.duration = 1
-                self.target_x = _target_x
-                self.start_time = pygame.time.get_ticks()
-                self.easing = True
+                # TODO: set_rotation -> 0 is from parent
+
+        self.try_attack()
 
     def try_attack(self):
         if self.next_attack < pygame.time.get_ticks():
@@ -291,6 +285,10 @@ class Boss(Utils.Sprite):
             else:
                 for i in range(random.randint(7, 10)):
                     Attack1Circle(random.randrange(0, GameProperties.win_size.width), random.randrange(GameProperties.win_size.height * 0.4, GameProperties.win_size.height), 5)
+        if self.next_shot < pygame.time.get_ticks():
+            self.next_shot = pygame.time.get_ticks() + self.cooldown_bullet + randint(-500, 1500)
+            shoot_pos = self.shooter_arm.pos + Vector2(0, 100).rotate(self.shooter_arm.angle)
+            Balle(shoot_pos, angle=Utils.calculate_angle(shoot_pos, Groups.PlayerGroup.sprites()[0].rect.center) - 90)
 
     def apply_damage(self, damage):
         self.health -= damage
@@ -333,7 +331,7 @@ class Attack1Rect(Utils.Sprite):
             progress = Utils.Easings.easeInOutSine((pygame.time.get_ticks() - self.spawn_tick - self.fade_in) / self.fade_out)
             self.image.set_alpha(round(200 + progress * (-200)))
 
-        elif self.image.get_alpha() == 0:
+        elif self.image.get_alpha() < 50:
             self.kill()
 
 
@@ -351,21 +349,21 @@ class Attack1Circle(Utils.Sprite):
         self.has_attacked = False
 
     def update(self):
-        if self.fade_out_start <= pygame.time.get_ticks():
+        if self.fade_out_start - 1400 <= pygame.time.get_ticks():
             if not self.has_attacked:
                 for player in Groups.PlayerGroup.sprites():
                     if pygame.sprite.collide_circle(self, player):
                         player.apply_damage(self.damage)
                 self.has_attacked = True
 
-            self.fade -= 10
-            self.border_fade -= 10
+            self.fade -= 30
+            self.border_fade -= 30
             if self.fade <= 0:
                 self.fade = 0
                 self.border_fade = 0
                 self.kill()
         else:
-            self.border_fade += 1.25
+            self.border_fade += 1.75
             if self.border_fade >= 255 or self.fade >= 255:
                 self.fade = 255
                 self.border_fade = 255
@@ -377,8 +375,8 @@ class Attack1Circle(Utils.Sprite):
 class Attack2Rect:
     def __init__(self, fade_in, damage, fade_out, size, color=(255, 0, 0, 255), space_between=150, **kwargs):
         pos = kwargs.get("midtop")
-        Attack1Rect(fade_in, damage, fade_out, (size[0]+25, size[1]), color, rotation=0, center=(GameProperties.win_size.width * 0.33, GameProperties.win_size.height * 0.7))
-        Attack1Rect(fade_in, damage, fade_out, (size[0]+25, size[1]), color, rotation=0, center=(GameProperties.win_size.width * 0.67, GameProperties.win_size.height * 0.7))
+        Attack1Rect(fade_in, damage, fade_out, (size[0] + 25, size[1]), color, rotation=0, center=(GameProperties.win_size.width * 0.33, GameProperties.win_size.height * 0.7))
+        Attack1Rect(fade_in, damage, fade_out, (size[0] + 25, size[1]), color, rotation=0, center=(GameProperties.win_size.width * 0.67, GameProperties.win_size.height * 0.7))
         for i in range(0, 4):
             Attack1Rect(fade_in, damage, fade_out, size, color, rotation=90, midtop=(pos[0], pos[1] + space_between * i))
 
@@ -389,6 +387,8 @@ class Attack2Rect:
 class Boss1(Boss):
     def __init__(self):
         super().__init__(EnemyAttributes.Boss1DefaultSpeedx.value, EnemyAttributes.Boss1DefaultSpeedy.value, EnemyAttributes.Boss1DefaultHealth.value, "5", EnemyAttributes.Boss1DefaultSpeedATK.value)
+        pygame.mixer.music.load("../sounds/BossSound.ogg")
+        pygame.mixer.music.play()
 
     def main_attack(self):
         pass
@@ -525,6 +525,8 @@ class Boss20(Boss):
                          EnemyAttributes.Boss20DefaultHealth.value * (1 + GameProperties.difficulty), EnemyAttributes.Boss20DefaultSpeedATK.value + GameProperties.difficulty,
                          Ennemies.Images.CommonInvader1)
 
+
+# endregion
 
 class EnemyAttributes(Enum):
     # common

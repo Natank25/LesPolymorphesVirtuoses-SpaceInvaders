@@ -26,6 +26,7 @@ class UI:
         background_menu_img = pygame.image.load("../img/background_menu.png")
         game_title_img = pygame.image.load("../img/title.png")
         login_icon = pygame.image.load("../img/UI/buttons/login.png")
+        login_icon_green = pygame.image.load("../img/UI/buttons/login_green.png")
         game_over_text = pygame.image.load("../img/UI/game_over.png")
         big_numbers_image = pygame.image.load("../img/UI/buttons/settings/big_numbers.png")
         scientific_numbers_image = pygame.image.load("../img/UI/buttons/settings/scientific.png")
@@ -36,6 +37,14 @@ class UI:
         gems_25 = pygame.image.load("../img/UI/buttons/shops/gems_25.png")
         gems_50 = pygame.image.load("../img/UI/buttons/shops/gems_50.png")
         gems_100 = pygame.image.load("../img/UI/buttons/shops/gems_100.png")
+
+        icon_coin = pygame.image.load("../img/coin.png")
+        icon_gem = pygame.image.load("../img/gem.png")
+
+        lock = pygame.image.load("../img/UI/buttons/shops/locked_upgrade.png")
+        red_skin1 = pygame.image.load("../img/hero/red.png")
+        green_skin1 = pygame.image.load("../img/hero/green.png")
+        blue_skin1 = pygame.image.load("../img/hero/blue.png")
 
     class Colors:
         color_passive = pygame.Color(100, 100, 100, 100)
@@ -52,23 +61,14 @@ class UI:
 
     class Sons:
         ButtonClick1 = pygame.mixer.Sound("../sounds/buttons/click_button.ogg")
-        ButtonClick1.set_volume(0.5)
         ButtonClick2 = pygame.mixer.Sound("../sounds/buttons/click_button2.ogg")
-        ButtonClick1.set_volume(0.5)
         ButtonClick3 = pygame.mixer.Sound("../sounds/buttons/click_button3.ogg")
-        ButtonClick1.set_volume(0.5)
         ButtonClick4 = pygame.mixer.Sound("../sounds/buttons/click_button4.ogg")
-        ButtonClick1.set_volume(0.5)
         ButtonClick5 = pygame.mixer.Sound("../sounds/buttons/click_button5.ogg")
-        ButtonClick1.set_volume(0.5)
         ButtonClick6 = pygame.mixer.Sound("../sounds/buttons/click_button6.ogg")
-        ButtonClick1.set_volume(0.5)
         ButtonClick7 = pygame.mixer.Sound("../sounds/buttons/click_button7.ogg")
-        ButtonClick1.set_volume(0.5)
         ButtonClick8 = pygame.mixer.Sound("../sounds/buttons/click_button8.ogg")
-        ButtonClick1.set_volume(0.5)
         ButtonClick9 = pygame.mixer.Sound("../sounds/buttons/click_button9.ogg")
-        ButtonClick1.set_volume(0.5)
 
 
 print("Player", pygame.time.get_ticks())
@@ -79,7 +79,7 @@ class Player:
 
     class Images:
         Vaisseau_Base = pygame.image.load("../img/vaisseau.png")
-        Balle = pygame.image.load("../img/balle.png")
+        Balle = pygame.image.load("../img/hero/bullet.png")
 
     print("    Sounds", pygame.time.get_ticks())
 
@@ -100,7 +100,9 @@ class Ennemies:
     print("    Images", pygame.time.get_ticks())
 
     class Images:
-        Balle = pygame.image.load("../img/balle.png")
+        Balle = pygame.image.load("../img/Invaders/bullet.png")
+
+        """
         CommonInvader1 = pygame.image.load("../img/Invaders/CommonInvader1.png")
         CommonInvader2 = pygame.image.load("../img/Invaders/CommonInvader2.png")
         CommonInvader3 = pygame.image.load("../img/Invaders/CommonInvader3.png")
@@ -110,10 +112,22 @@ class Ennemies:
         TankInvader1 = pygame.image.load("../img/Ships/UFO.png")
         TankInvader2 = pygame.image.load("../img/Ships/UFO.png")
         TankInvader3 = pygame.image.load("../img/Ships/UFO.png")
-        LightningAnimated = pygame.image.load("../img/Ships/Lightning.png")
-        Explosion = pygame.image.load("../img/Ships/explosions/explosion_01_strip13.png")
-        Explosion_pink = pygame.image.load("../img/Ships/explosions/explosion_02_strip13.png")
-        Explosion_purple = pygame.image.load("../img/Ships/explosions/explosion_03_strip13.png")
+        
+        """
+        CommonInvader1 = pygame.image.load("../img/Invaders/Dove.png")
+        CommonInvader2 = pygame.image.load("../img/Invaders/Ligher.png")
+        CommonInvader3 = pygame.image.load("../img/Invaders/Lightning.png")
+        SpeedInvader1 = pygame.image.load("../img/Invaders/Ninja.png")
+        SpeedInvader2 = pygame.image.load("../img/Invaders/Paranoid.png")
+        SpeedInvader3 = pygame.image.load("../img/Invaders/Saboteur.png")
+        TankInvader1 = pygame.image.load("../img/Invaders/UFO.png")
+        TankInvader2 = pygame.image.load("../img/Invaders/UFO.png")
+        TankInvader3 = pygame.image.load("../img/Invaders/UFO.png")
+
+        LightningAnimated = pygame.image.load("../img/Invaders/Lightning.png")
+        Explosion = pygame.image.load("../img/Invaders/explosions/explosion_01_strip13.png")
+        Explosion_pink = pygame.image.load("../img/Invaders/explosions/explosion_02_strip13.png")
+        Explosion_purple = pygame.image.load("../img/Invaders/explosions/explosion_03_strip13.png")
 
     print("    Sounds", pygame.time.get_ticks())
 

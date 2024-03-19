@@ -1,9 +1,8 @@
 import sys
-
 import pygame
 
 print(100, pygame.time.get_ticks())
-from python import Resources
+from python import Resources, Utils
 
 print(101, pygame.time.get_ticks())
 from python.DataManager import DataManager
@@ -44,7 +43,7 @@ default_win_size = [500, 800]
 
 win_scale = 1
 
-screen: pygame.surface.Surface = None
+screen: pygame.surface.Surface = pygame.surface.Surface((0, 0))
 
 background = Resources.UI.Images.background_menu_img
 
@@ -58,9 +57,9 @@ current_wave = DataManager.get_current_waves(username)
 
 has_paused = False
 
-coins: int = DataManager.get_coins_player(username)
+coins = Utils.MutableNumber(DataManager.get_coins_player(username))
 
-gems: int = DataManager.get_gems_player(username)
+gems = Utils.MutableNumber(DataManager.get_gems_player(username))
 
 does_player_exists = False
 
@@ -79,6 +78,18 @@ events = pygame.event.get()
 settings = {"coins_type": 'big_number'}
 
 playing = False
+
+logged_in = False
+
+red_skin1_locked = True
+
+green_skin1_locked = True
+
+blue_skin1_locked = True
+
+skin = Resources.Player.Images.Vaisseau_Base
+
+skin_name = 'base'
 
 
 def big_number_format(cash):
@@ -182,6 +193,30 @@ def gems_100():
         coins *= 100
 
 
+def red_skin1():
+    global gems, red_skin1_locked
+    if get_red1_skin_cost() <= gems:
+        gems -= get_red1_skin_cost()
+        gem_shop[Upgrades.red1_skin] += 1
+        red_skin1_locked = False
+
+
+def green_skin1():
+    global gems, green_skin1_locked
+    if get_green1_skin_cost() <= gems:
+        gems -= get_green1_skin_cost()
+        gem_shop[Upgrades.green1_skin] += 1
+        green_skin1_locked = False
+
+
+def blue_skin1():
+    global gems, blue_skin1_locked
+    if get_blue1_skin_cost() <= gems:
+        gems -= get_blue1_skin_cost()
+        gem_shop[Upgrades.blue1_skin] += 1
+        blue_skin1_locked = False
+
+
 def get_gems_10_cost():
     return 10
 
@@ -196,6 +231,18 @@ def get_gems_50_cost():
 
 def get_gems_100_cost():
     return 100
+
+
+def get_red1_skin_cost():
+    return 25
+
+
+def get_green1_skin_cost():
+    return 25
+
+
+def get_blue1_skin_cost():
+    return 25
 
 
 class Upgrades:
@@ -215,9 +262,34 @@ class Upgrades:
     gems_50 = "gems_50"
     gems_100 = "gems_100"
 
+    red1_skin = "red1_skin"
+    green1_skin = "green1_skin"
+    blue1_skin = "blue1_skin"
+
 
 def leave_game():
-    print(username)
+    """
+    confirmation_text = "Do you really want to quit? (Y/N)"
+    confirmation_font = pygame.font.Font(None, 36)
+    confirmation_surface = confirmation_font.render(confirmation_text, True, (255, 255, 255))
+    confirmation_rect = confirmation_surface.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
+
+    confirmation_done = False
+
+    while not confirmation_done:
+        # to do with a popup ------------------------------------------- !!!!!!!!!!
+        screen.blit(group_background, (0, 0))
+        screen.blit(confirmation_surface, confirmation_rect)
+        pygame.display.flip()
+
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_y:
+                    return True
+                elif event.key == pygame.K_n:
+                    confirmation_done = True
+    """
+
     DataManager.save_game(username)
 
     pygame.quit()

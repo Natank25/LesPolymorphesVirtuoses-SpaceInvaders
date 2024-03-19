@@ -1,6 +1,6 @@
 https://trello.com/b/N0J4lkN8/space-invader
 
-To implement:
+To implement :
 - □ skins
 - □ users
 - ■ levels

@@ -2,11 +2,11 @@ import math
 
 import pygame
 
-from python import GameProperties, EnemiesManager, DataManager, Utils
+from python import GameProperties, EnemiesManager, DataManager, Utils, UIElements
 from python import Groups, Player
 from python import Resources
 from python.Player import PlayerProperties
-from python.Utils import Text, ShopText, Button, TextBox, Sprite
+from python.Utils import Text, ShopText, Button, TextBox
 
 pygame.init()
 
@@ -68,32 +68,30 @@ class Menu:
     @staticmethod
     def create_show_game_button(x, y):
         content_list.append(Button(pygame.Vector2(x, y), Resources.UI.Images.play_game_button_img, lambda: show_game()))
-        Resources.UI.Sons.ButtonClick8.play()
 
     @staticmethod
     def create_show_shop_button(x, y):
         content_list.append(Button(pygame.Vector2(x, y), Resources.UI.Images.shop_button_img, lambda: show_shop()))
-        Resources.UI.Sons.ButtonClick8.play()
 
     @staticmethod
     def create_show_settings_button(x, y):
         content_list.append(Button(pygame.Vector2(x, y), Resources.UI.Images.settings_button_img, lambda: show_settings()))
-        Resources.UI.Sons.ButtonClick8.play()
 
     @staticmethod
     def create_leave_game_button(x, y):
         content_list.append(Button(pygame.Vector2(x, y), Resources.UI.Images.quit_button_img, lambda: leave_game()))
-        Resources.UI.Sons.ButtonClick8.play()
 
     @staticmethod
     def create_login_button(x, y):
-        content_list.append(Button(pygame.Vector2(x, y), Resources.UI.Images.login_icon, lambda: show_login()))
-        Resources.UI.Sons.ButtonClick8.play()
+        if not GameProperties.logged_in:
+            content_list.append(Button(pygame.Vector2(x, y), Resources.UI.Images.login_icon, lambda: show_login()))
+        else:
+            content_list.append(Button(pygame.Vector2(x, y), Resources.UI.Images.login_icon_green, lambda: show_login()))
+            Login.create_logged_in_text(x - GameProperties.win_size.width * 0.3, y - (GameProperties.win_size.y + GameProperties.win_size.height * 0.03))
 
     @staticmethod
     def create_show_menu_button(x, y):
         content_list.append(Button(pygame.Vector2(x, y), Resources.UI.Images.play_game_button_img, lambda: show_menu()))
-        Resources.UI.Sons.ButtonClick8.play()
 
 
 class Pause:
@@ -113,6 +111,8 @@ class Pause:
         GameProperties.has_paused = True
         Pause.create_resume_game_button(GameProperties.win_size.x + GameProperties.win_size.width * 0.5, GameProperties.win_size.y + GameProperties.win_size.height * 0.45)
         Pause.create_back_menu_button(GameProperties.win_size.x + GameProperties.win_size.width * 0.5, GameProperties.win_size.y + GameProperties.win_size.height * 0.8)
+        Resources.UI.Sons.ButtonClick8.play()
+        Resources.UI.Sons.ButtonClick8.set_volume(0.10)
 
     @staticmethod
     def resume_game():
@@ -126,6 +126,8 @@ class Pause:
         GameProperties.set_background(Resources.UI.Images.background_img)
         GameProperties.game_started = True
         Settings.show_coins()
+        Resources.UI.Sons.ButtonClick8.play()
+        Resources.UI.Sons.ButtonClick8.set_volume(0.10)
 
     @staticmethod
     def create_resume_game_button(x, y):
@@ -135,6 +137,7 @@ class Pause:
     def resume_game_button_click():
         Pause.unpause_game()
         Resources.UI.Sons.ButtonClick1.play()
+        Resources.UI.Sons.ButtonClick1.set_volume(0.10)
 
     @staticmethod
     def unpause_game():
@@ -151,7 +154,6 @@ class Pause:
     @staticmethod
     def back_menu_button_click():
         Pause.go_back()
-        Resources.UI.Sons.ButtonClick1.play()
 
     @staticmethod
     def go_back():
@@ -169,6 +171,7 @@ class Pause:
         for players in Groups.PlayerGroup.sprites():
             players.kill()
         for invader in Groups.InvaderGroup.sprites():
+            # noinspection PyArgumentList
             invader.kill(animation=False)  # Expected argument
         for bullet in Groups.BulletGroup.sprites():
             bullet.kill()
@@ -206,10 +209,15 @@ class Game:
 
     @staticmethod
     def show_gem_text_upleft():
-        content_list.append(
-            Text("Gems : " + str(GameProperties.gems), (200, 6, 6), Resources.UI.Fonts.arialblack_20, update_function=lambda self: setattr(self, "text", "Gems : " + str(GameProperties.gems)),
-                 update_text=True,
-                 topleft="(GameProperties.win_size.x + GameProperties.win_size.width - Text.image.get_width - GameProperties.win_size.width * 0.005, GameProperties.win_size.y + GameProperties.win_size.height * 0.035)"))
+        content_list.append(UIElements.HorizontalGroup(
+            (GameProperties.win_size.x + GameProperties.win_size.width * 0.92, GameProperties.win_size.y + GameProperties.win_size.height * 0.06),
+            [UIElements.Image(pygame.transform.scale(Resources.UI.Images.icon_gem, (22, 22)), (0, 0)), UIElements.Text(GameProperties.gems, Resources.UI.Fonts.fugaz_one_30, (0, 0))], spacing=10))
+
+        """      
+        Text("Gems : " + str(GameProperties.gems), (200, 6, 6), Resources.UI.Fonts.arialblack_20, update_function=lambda self: setattr(self, "text", "Gems : " + str(GameProperties.gems)),
+        update_text=True,
+        topleft="(GameProperties.win_size.x + GameProperties.win_size.width - Text.image.get_width - GameProperties.win_size.width * 0.005, GameProperties.win_size.y + GameProperties.win_size.height * 0.035)"))
+        """
 
     @staticmethod
     def hide_game():
@@ -267,21 +275,35 @@ class Game:
 
     @staticmethod
     def show_coins_text(pos, coindrop):
-        content_list.append(Text("+" + str(coindrop), (255, 255, 0), Resources.UI.Fonts.arialblack_20, update_function=lambda self: Game.coin_update(self), center=(pos[0], pos[1])))
-        # rajouter l'image à la place du chiffre
+        text = Text("+" + str(coindrop), (255, 255, 0), Resources.UI.Fonts.arialblack_20, update_function=lambda self: Game.coin_update(self), center=pos)
+        Game.show_kill_text(pos, text)
 
     @staticmethod
     def show_gem_text(pos, gemdrop):
-        content_list.append(Text("+" + str(gemdrop), (200, 6, 6), Resources.UI.Fonts.arialblack_20, update_function=lambda self: Game.gem_update(self), center=(pos[0], pos[1])))
-        # rajouter l'image à la place du chiffre
+        text = Text("+" + str(gemdrop), (200, 6, 6), Resources.UI.Fonts.arialblack_20, update_function=lambda self: Game.gem_update(self), center=pos)
+        Game.show_kill_text(pos, text)
+
+    @staticmethod
+    def show_kill_text(pos, text):
+        img_text = text.image.copy()
+        gem_icon = pygame.transform.scale(Resources.UI.Images.icon_coin, (text.image.get_height(), text.image.get_height()))
+        text.image = pygame.Surface((text.image.get_width() + gem_icon.get_width() + 10, text.image.get_height()), pygame.SRCALPHA)
+        text.image.blit(img_text, (0, 0))
+        text.image.blit(gem_icon, (img_text.get_width() + 10, 0))
+        text.rect = text.image.get_rect(center=pos)
+        content_list.append(text)
 
     @staticmethod
     def coin_update(text):
+        if text.image.get_alpha() == 0:
+            text.kill()
         text.image.set_alpha(500 - (pygame.time.get_ticks() - text.spawn_tick) // 2)
         text.rect.move_ip(0, -1.5)
 
     @staticmethod
     def gem_update(text):
+        if text.image.get_alpha() == 0:
+            text.kill()
         text.image.set_alpha(800 - (pygame.time.get_ticks() - text.spawn_tick) // 2)
         text.rect.move_ip(0, -1)
 
@@ -326,10 +348,89 @@ class Shop:
         Shop.back_menu_button(GameProperties.win_size.width * 0.05 + GameProperties.win_size.x, GameProperties.win_size.y + GameProperties.win_size.height * 0.05)
         content_list.append(Button(pygame.Vector2(GameProperties.win_size.width * 0.05 + GameProperties.win_size.x, GameProperties.win_size.y + GameProperties.win_size.height * 0.5),
                                    pygame.transform.rotate(Resources.UI.Images.arrow_img, 90), lambda: Shop.show_shop()))
+        content_list.append(Button(pygame.Vector2(GameProperties.win_size.width * 0.95 + GameProperties.win_size.x, GameProperties.win_size.y + GameProperties.win_size.height * 0.5),
+                                   pygame.transform.rotate(Resources.UI.Images.arrow_img, -90), lambda: Shop.skin_shop()))
         Shop.buy_10_button(GameProperties.win_size.width * 0.5 + GameProperties.win_size.x, GameProperties.win_size.y + GameProperties.win_size.height * 0.2)
         Shop.buy_25_button(GameProperties.win_size.width * 0.5 + GameProperties.win_size.x, GameProperties.win_size.y + GameProperties.win_size.height * 0.4)
         Shop.buy_50_button(GameProperties.win_size.width * 0.5 + GameProperties.win_size.x, GameProperties.win_size.y + GameProperties.win_size.height * 0.6)
         Shop.buy_100_button(GameProperties.win_size.width * 0.5 + GameProperties.win_size.x, GameProperties.win_size.y + GameProperties.win_size.height * 0.8)
+
+    @staticmethod
+    def skin_shop():
+        hide_all()
+        GameProperties.set_background(Resources.UI.Images.background_img)
+        GameProperties.screen.blit(GameProperties.background, GameProperties.win_size.topleft)
+        content_list.append(
+            Text("Gems : " + str(GameProperties.gems), (200, 6, 6), Resources.UI.Fonts.arialblack_20, update_function=lambda self: setattr(self, "text", "Gems : " + str(GameProperties.gems)),
+                 update_text=True,
+                 topleft="(GameProperties.win_size.x + GameProperties.win_size.width - Text.image.get_width - GameProperties.win_size.width * 0.005, GameProperties.win_size.y + GameProperties.win_size.height * 0.005)"))
+        Shop.back_menu_button(GameProperties.win_size.width * 0.05 + GameProperties.win_size.x, GameProperties.win_size.y + GameProperties.win_size.height * 0.05)
+        content_list.append(Button(pygame.Vector2(GameProperties.win_size.width * 0.05 + GameProperties.win_size.x, GameProperties.win_size.y + GameProperties.win_size.height * 0.5),
+                                   pygame.transform.rotate(Resources.UI.Images.arrow_img, 90), lambda: Shop.gem_shop()))
+        Shop.skin_red1_shop(GameProperties.win_size.width * 0.25, GameProperties.win_size.height * 0.3)
+        Shop.skin_green1_shop(GameProperties.win_size.width * 0.5, GameProperties.win_size.height * 0.3)
+        Shop.skin_blue1_shop(GameProperties.win_size.width * 0.75, GameProperties.win_size.height * 0.3)
+
+    @staticmethod
+    def skin_red1_shop(x, y):
+        content_list.append(Utils.SpriteImage(Resources.UI.Images.red_skin1, center=(x, y - 75)))
+        if GameProperties.red_skin1_locked:
+            content_list.append(Utils.SpriteImage(Resources.UI.Images.lock, center=(x, y - 75)))
+            content_list.append(Button(pygame.Vector2(x, y), Resources.UI.Images.play_game_button_img, lambda: Shop.refresh_page(GameProperties.red_skin1)))
+            content_list.append(ShopText(GameProperties.Upgrades.red1_skin, gems=True, center="(" + str(x) + "," + str(y) + ")"))
+        else:
+            if GameProperties.skin_name == 'red1':
+                content_list.append(Text("Equipped", (255, 255, 255), Resources.UI.Fonts.arialblack_20, center=(x, y)))
+            else:
+                content_list.append(Button(pygame.Vector2(x, y), Resources.UI.Images.leave_game_button_img, lambda: Shop.refresh_page(Shop.equip_red1)))
+
+    @staticmethod
+    def skin_green1_shop(x, y):
+        content_list.append(Utils.SpriteImage(Resources.UI.Images.green_skin1, center=(x, y - 75)))
+        if GameProperties.green_skin1_locked:
+            content_list.append(Utils.SpriteImage(Resources.UI.Images.lock, center=(x, y - 75)))
+            content_list.append(Button(pygame.Vector2(x, y), Resources.UI.Images.play_game_button_img, lambda: Shop.refresh_page(GameProperties.green_skin1())))
+            content_list.append(ShopText(GameProperties.Upgrades.green1_skin, gems=True, center="(" + str(x) + "," + str(y) + ")"))
+        else:
+            if GameProperties.skin_name == 'green1':
+                content_list.append(Text("Equipped", (255, 255, 255), Resources.UI.Fonts.arialblack_20, center=(x, y)))
+            else:
+                content_list.append(Button(pygame.Vector2(x, y), Resources.UI.Images.leave_game_button_img, lambda: Shop.refresh_page(Shop.equip_green1())))
+
+    @staticmethod
+    def skin_blue1_shop(x, y):
+        content_list.append(Utils.SpriteImage(Resources.UI.Images.blue_skin1, center=(x, y - 75)))
+        if GameProperties.blue_skin1_locked:
+            content_list.append(Utils.SpriteImage(Resources.UI.Images.lock, center=(x, y - 75)))
+            content_list.append(Button(pygame.Vector2(x, y), Resources.UI.Images.play_game_button_img, lambda: Shop.refresh_page(GameProperties.blue_skin1())))
+            content_list.append(ShopText(GameProperties.Upgrades.blue1_skin, gems=True, center="(" + str(x) + "," + str(y) + ")"))
+        else:
+            if GameProperties.skin_name == 'blue1':
+                content_list.append(Text("Equipped", (255, 255, 255), Resources.UI.Fonts.arialblack_20, center=(x, y)))
+            else:
+                content_list.append(Button(pygame.Vector2(x, y), Resources.UI.Images.leave_game_button_img, lambda: Shop.refresh_page(Shop.equip_blue1())))
+
+    @staticmethod
+    def refresh_page(other_function=None):
+        if other_function is not None:
+            other_function()
+
+        Shop.skin_shop()
+
+    @staticmethod
+    def equip_red1():
+        GameProperties.skin = Resources.UI.Images.red_skin1
+        GameProperties.skin_name = 'red1'
+
+    @staticmethod
+    def equip_green1():
+        GameProperties.skin = Resources.UI.Images.green_skin1
+        GameProperties.skin_name = 'green1'
+
+    @staticmethod
+    def equip_blue1():
+        GameProperties.skin = Resources.UI.Images.blue_skin1
+        GameProperties.skin_name = 'blue1'
 
     @staticmethod
     def upgrade_dmg_button(x, y):
@@ -434,9 +535,9 @@ class GameOver:
         Pause.create_back_menu_button(GameProperties.win_size.x + GameProperties.win_size.width / 2, GameProperties.win_size.y + GameProperties.win_size.height * 0.85)
         content_list.append(Resources.UI.Images.game_over_text)
 
-        content_list.append(GameOver.GameOver_Image())
+        content_list.append(GameOver.GameOverImage())
 
-    class GameOver_Image(Utils.Sprite):
+    class GameOverImage(Utils.Sprite):
         def __init__(self):
             super().__init__(Groups.UIGroup)
             self.image = Resources.UI.Images.game_over_text
@@ -449,36 +550,7 @@ class GameOver:
 
 
 class Login:
-    class LoginPopUp(Sprite):
-        def __init__(self, text, text_color, font, background_color, buttons: [Button], buttons_size, **kwargs):
-            super().__init__(Groups.UIGroup)
-            self.background_color = background_color
-            self.text_color = text_color
-            self.text = text
-            self.font = font
-            self.buttons = buttons
-
-            for button in self.buttons:
-                content_list.append(button)
-                for group in button.groups():
-                    group.remove(button)
-                    group.add(button)
-
-            self.text_image = self.font.render(self.text, True, self.text_color, self.background_color)
-            self.text_rect = self.text_image.get_rect()
-            self.buttons_rect = pygame.rect.Rect(0, self.text_rect.height, buttons_size[0], buttons_size[1])
-            self.image = pygame.surface.Surface((max(self.text_rect.width, self.buttons_rect.width), self.text_rect.height + self.buttons_rect.height))
-            self.image.fill(self.background_color)
-            self.image.blit(self.text_image, self.text_rect.move(self.image.get_rect().width / 2 - self.text_rect.width / 2, 15))
-
-            self.rect = self.image.get_rect(**kwargs)
-
-        def kill(self):
-            for button in self.buttons:
-                button.kill()
-            super().kill()
-
-    loginPopUp: LoginPopUp = None
+    loginPopUp: Utils.PopUp = None
     inputBox: TextBox = None
     passwordBox: TextBox = None
 
@@ -502,14 +574,20 @@ class Login:
         content_list.append(inputBox)
         content_list.append(passwordBox)
         Login.verify_login_password(GameProperties.win_size.x + GameProperties.win_size.width / 2, GameProperties.win_size.y + GameProperties.win_size.height * 0.80)
+        Resources.UI.Sons.ButtonClick8.play()
+        Resources.UI.Sons.ButtonClick8.set_volume(0.10)
 
     @staticmethod
     def show_login_text(x, y):
         content_list.append(Text("Username : ", (255, 255, 255), Resources.UI.Fonts.arialblack_20, center=(x, y)))
+        Resources.UI.Sons.ButtonClick8.play()
+        Resources.UI.Sons.ButtonClick8.set_volume(0.10)
 
     @staticmethod
     def show_password_text(x, y):
         content_list.append(Text("Password : ", (255, 255, 255), Resources.UI.Fonts.arialblack_20, center=(x, y)))
+        Resources.UI.Sons.ButtonClick8.play()
+        Resources.UI.Sons.ButtonClick8.set_volume(0.10)
 
     @staticmethod
     def try_login():
@@ -521,25 +599,39 @@ class Login:
         """
         if inputBox.text != "" and passwordBox.text != "":
             if DataManager.DataManager.verify_successful_login(inputBox.text, passwordBox.text):
-                print('vous allez vous connecter au compte de :', inputBox.text)
-                DataManager.DataManager.load_game(username=inputBox.text)
-                show_menu()
+                Login.loginPopUp = Utils.PopUp("Vous allez vous connecter au compte :  " + inputBox.text, "white", Resources.UI.Fonts.arialblack_20, "blue4",
+                                               [Login.accept_login_button(GameProperties.win_size.x + GameProperties.win_size.width * 0.35,
+                                                                          GameProperties.win_size.y + GameProperties.win_size.height * 0.55),
+                                                Login.cancel_button(GameProperties.win_size.x + GameProperties.win_size.width * 0.75,
+                                                                    GameProperties.win_size.y + GameProperties.win_size.height * 0.55)],
+                                               (25 + (GameProperties.win_size.width - 50) * 0.8, GameProperties.win_size.height * 0.1), content_list,
+                                               midtop=[GameProperties.win_size.x + GameProperties.win_size.width * 0.5, GameProperties.win_size.y + GameProperties.win_size.height * 0.4])
 
             elif len(passwordBox.text) < 3:
-                print('le password est trop court')
+                Login.loginPopUp = Utils.PopUp("Password is too short", "white", Resources.UI.Fonts.arialblack_20, "blue4",
+                                               [Login.ok_button(GameProperties.win_size.x + GameProperties.win_size.width * 0.5,
+                                                                GameProperties.win_size.y + GameProperties.win_size.height * 0.55)],
+                                               (25 + (GameProperties.win_size.width - 50) * 0.8, GameProperties.win_size.height * 0.1), content_list,
+                                               midtop=[GameProperties.win_size.x + GameProperties.win_size.width * 0.5, GameProperties.win_size.y + GameProperties.win_size.height * 0.4])
             else:
-                print('vous allez créer un compte')
-                DataManager.DataManager.add_user(username=inputBox.text, password=passwordBox.text)
-                DataManager.DataManager.load_game(username=inputBox.text)
-                show_menu()
+                Login.loginPopUp = Utils.PopUp("Vous allez créer un nouveau compte " + inputBox.text, "white", Resources.UI.Fonts.arialblack_20, "blue4",
+                                               [Login.accept_create_button(GameProperties.win_size.x + GameProperties.win_size.width * 0.35,
+                                                                           GameProperties.win_size.y + GameProperties.win_size.height * 0.55),
+                                                Login.cancel_button(GameProperties.win_size.x + GameProperties.win_size.width * 0.75,
+                                                                    GameProperties.win_size.y + GameProperties.win_size.height * 0.55)],
+                                               (25 + (GameProperties.win_size.width - 50) * 0.8, GameProperties.win_size.height * 0.1), content_list,
+                                               midtop=[GameProperties.win_size.x + GameProperties.win_size.width * 0.5, GameProperties.win_size.y + GameProperties.win_size.height * 0.4])
 
         elif inputBox.text == "":
-            print('veuillez rentrer un username cohérent')
+            Login.loginPopUp = Utils.PopUp("veuillez rentrer un username cohérent", "white", Resources.UI.Fonts.arialblack_20, "blue4",
+                                           [Login.ok_button(GameProperties.win_size.x + GameProperties.win_size.width * 0.5, GameProperties.win_size.y + GameProperties.win_size.height * 0.55)],
+                                           (25 + (GameProperties.win_size.width - 50) * 0.8, GameProperties.win_size.height * 0.1), content_list,
+                                           midtop=[GameProperties.win_size.x + GameProperties.win_size.width * 0.5, GameProperties.win_size.y + GameProperties.win_size.height * 0.4])
         elif passwordBox.text == "":
-            Login.loginPopUp = Login.LoginPopUp("Votre mot de passe est vide", "white", Resources.UI.Fonts.arialblack_20, "blue4",
-                                                [Login.ok_button(GameProperties.win_size.x + GameProperties.win_size.width * 0.5, GameProperties.win_size.y + GameProperties.win_size.height * 0.55)],
-                                                (25 + (GameProperties.win_size.width - 50) * 0.8, GameProperties.win_size.height * 0.1),
-                                                midtop=[GameProperties.win_size.x + GameProperties.win_size.width * 0.5, GameProperties.win_size.y + GameProperties.win_size.height * 0.4])
+            Login.loginPopUp = Utils.PopUp("Votre mot de passe est vide", "white", Resources.UI.Fonts.arialblack_20, "blue4",
+                                           [Login.ok_button(GameProperties.win_size.x + GameProperties.win_size.width * 0.5, GameProperties.win_size.y + GameProperties.win_size.height * 0.55)],
+                                           (25 + (GameProperties.win_size.width - 50) * 0.8, GameProperties.win_size.height * 0.1), content_list,
+                                           midtop=[GameProperties.win_size.x + GameProperties.win_size.width * 0.5, GameProperties.win_size.y + GameProperties.win_size.height * 0.4])
             content_list.append(Login.loginPopUp)
             # Login.LoginPopUp1('empty_password', center=(GameProperties.win_size.x + GameProperties.win_size.width*0.5, GameProperties.win_size.y + GameProperties.win_size.height*0.4))
 
@@ -547,12 +639,62 @@ class Login:
     def ok_button(x, y):
         btn = Button(pygame.Vector2(x, y), Resources.UI.Images.play_game_button_img, lambda: Login.del_pop_up())
         content_list.append(btn)
+        Resources.UI.Sons.ButtonClick8.play()
+        Resources.UI.Sons.ButtonClick8.set_volume(0.10)
+        return btn
+
+    @staticmethod
+    def cancel_button(x, y):
+        btn = Button(pygame.Vector2(x, y), Resources.UI.Images.leave_game_button_img, lambda: Login.del_pop_up())
+        content_list.append(btn)
+        Resources.UI.Sons.ButtonClick8.play()
+        Resources.UI.Sons.ButtonClick8.set_volume(0.10)
+        return btn
+
+    @staticmethod
+    def accept_create_button(x, y):
+        btn = Button(pygame.Vector2(x, y), Resources.UI.Images.play_game_button_img, lambda: Login.del_pop_up_create())
+        content_list.append(btn)
+        Resources.UI.Sons.ButtonClick8.play()
+        Resources.UI.Sons.ButtonClick8.set_volume(0.10)
+        return btn
+
+    @staticmethod
+    def accept_login_button(x, y):
+        btn = Button(pygame.Vector2(x, y), Resources.UI.Images.play_game_button_img, lambda: Login.del_pop_up_login())
+        content_list.append(btn)
+        Resources.UI.Sons.ButtonClick8.play()
+        Resources.UI.Sons.ButtonClick8.set_volume(0.10)
         return btn
 
     @staticmethod
     def del_pop_up():
         Login.loginPopUp.kill()
         pass
+
+    @staticmethod
+    def del_pop_up_login():
+        DataManager.DataManager.load_game(username=inputBox.text)
+        GameProperties.logged_in = True
+        show_menu()
+        Login.loginPopUp.kill()
+        pass
+
+    @staticmethod
+    def del_pop_up_create():
+        DataManager.DataManager.add_user(inputBox.text, passwordBox.text)
+        DataManager.DataManager.load_game(username=inputBox.text)
+        GameProperties.logged_in = True
+        show_menu()
+        Login.loginPopUp.kill()
+        pass
+
+    @staticmethod
+    def create_logged_in_text(x, y):
+        if len(inputBox.text) > 5:
+            for i in range(len(inputBox.text) - 5):
+                x -= 9
+        content_list.append(Text("Logged In as : " + inputBox.text, (255, 255, 255), Resources.UI.Fonts.arialblack_20, center=(x, y)))
 
     class LoginPopUp1(Text):
         def __init__(self, message_type, color='white', **kwargs):
@@ -594,6 +736,8 @@ def show_menu():
     hide_all()
     Menu.show_menu()
     shown_screen = Menu
+    Resources.UI.Sons.ButtonClick8.play()
+    Resources.UI.Sons.ButtonClick8.set_volume(0.10)
 
 
 def show_game():
@@ -601,6 +745,8 @@ def show_game():
     hide_all()
     Game.show_game()
     shown_screen = Game
+    Resources.UI.Sons.ButtonClick8.play()
+    Resources.UI.Sons.ButtonClick8.set_volume(0.10)
 
 
 def show_shop():
@@ -608,6 +754,8 @@ def show_shop():
     hide_all()
     Shop.show_shop()
     shown_screen = Shop
+    Resources.UI.Sons.ButtonClick8.play()
+    Resources.UI.Sons.ButtonClick8.set_volume(0.10)
 
 
 def show_login():
@@ -615,18 +763,26 @@ def show_login():
     hide_all()
     Login.show_login_menu()
     shown_screen = Login
+    Resources.UI.Sons.ButtonClick8.play()
+    Resources.UI.Sons.ButtonClick8.set_volume(0.10)
 
 
 def show_settings():
     global shown_screen
     hide_all()
     Settings.show_settings()
+    Resources.UI.Sons.ButtonClick8.play()
+    Resources.UI.Sons.ButtonClick8.set_volume(0.10)
     shown_screen = Settings
+    Resources.UI.Sons.ButtonClick8.play()
+    Resources.UI.Sons.ButtonClick8.set_volume(0.10)
 
 
 def leave_game():
     global shown_screen
     GameProperties.leave_game()
+    Resources.UI.Sons.ButtonClick8.play()
+    Resources.UI.Sons.ButtonClick8.set_volume(0.10)
 
 
 def show_starting_screen():
@@ -645,6 +801,8 @@ def show_game_over():
 
 def show_pause():
     Pause.show_pause()
+    Resources.UI.Sons.ButtonClick8.play()
+    Resources.UI.Sons.ButtonClick8.set_volume(0.10)
 
 
 def resume_game():
