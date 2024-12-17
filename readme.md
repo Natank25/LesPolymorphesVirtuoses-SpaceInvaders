@@ -1,12 +1,5 @@
-https://trello.com/b/N0J4lkN8/space-invader
+# Space Invader
 
-To implement :
-- □ skins
-- □ users
-- ■ levels
-- □ sound
-- □ local multiplayer (maybe online)
-- □ currency system (gems : skins, coins : upgrades)
-- □ healthbar (bosses)
-- □ executable
-  
+NSI - Terminale <br>
+Projet de 3 semaines en Python avec pygame en groupe de 3 <br>
+Le but est de recréer le jeu Space Invader à sa façon.
